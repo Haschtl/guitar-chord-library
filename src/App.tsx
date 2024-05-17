@@ -1,15 +1,19 @@
 import { Box, Grid, Paper, Typography } from "@mui/material";
 import "./App.css";
 import ReactChords from "./ReactChords";
-import { allChords, allChordNames, translateChordname } from "./chords";
-import { useState } from "react";
+import { Chords, loadChords, translateChordname } from "./chords";
+import { useEffect, useState } from "react";
 
 const fixChordName=(name:string)=>{
   return name;
   // return name.replace("#m", "m#");
 }
 function App() {
-  console.log(allChordNames);
+  // console.log(allChordNames);
+  const [allChords,setAllChords]=useState<Chords>({})
+  useEffect(()=>{
+    loadChords().then(chords=>setAllChords(chords))
+  },[])
   // const chord: Chord = {
   //   // array of [string, fret, text | options]
   //   fingers: [
