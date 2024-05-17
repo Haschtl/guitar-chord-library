@@ -1,10 +1,8 @@
 import { Chord } from "svguitar";
 import chords from "../public/database/completeChordsFormatted.json";
 
-export const allChords: Record<string, Chord[]> = chords as Record<
-  string,
-  Chord[]
->;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const allChords: Record<string, Chord[]> = chords as any;
 export const allChordNames = Object.keys(allChords);
 
 export const translateChordname = (chord: string) => {
