@@ -10,5 +10,5 @@ export const translateChordname = (chord: string) => {
   return chord.replace("B", "H").replace("Hb", "B");
 };
 
-export const loadChords = ()=>fetch(`/database/completeChordsFormatted.json`)
+export const loadChords = ()=>fetch(import.meta.env.BASE_URL+`database/completeChordsFormatted.json`)
   .then((response) => response.json() as Promise<Chords>)
