@@ -9,7 +9,7 @@ interface Props {
   chords?: Chord[];
   germanNotation?: boolean;
 }
-const ReactChords: React.FC<Props> = ({ chords=[], germanNotation }) => {
+const ReactChords: React.FC<Props> = ({ chords = [], germanNotation }) => {
   const [index, setIndex] = useState(0);
   const setSmartIndex = useCallback(
     (step: number) => {
@@ -23,7 +23,7 @@ const ReactChords: React.FC<Props> = ({ chords=[], germanNotation }) => {
   const setNextIdx = useCallback(() => {
     setSmartIndex(1);
   }, [setSmartIndex]);
-  if (chords.length<=0){
+  if (chords.length <= 0) {
     return (
       <>
         <Typography variant="caption">
@@ -32,13 +32,32 @@ const ReactChords: React.FC<Props> = ({ chords=[], germanNotation }) => {
       </>
     );
   }
+  const position = chords[index].position ?? 1;
+  const positions = chords.map((c) => c.position ?? 1);
+  const numIdenticalPositions = positions.filter((p) => p === position).length;
+  const positionIndex = positions.slice(0, index + 1).reduce((p, c) => {
+    if (c === position) {
+      p += 1;
+    }
+    return p;
+  }, 0);
+  let appendix = "";
+  if (position > 1) {
+    appendix += "-" + position + "fr";
+  }
+  if (numIdenticalPositions > 1) {
+    appendix += "-v"+positionIndex;
+  }
   return (
     <>
-                <Typography variant="caption">
-
-      {`${index + 1}/${chords.length}`}
-</Typography>
-      <ReactChord chord={chords[index]} germanNotation={germanNotation} />
+      <Typography variant="caption">
+        {`${index + 1}/${chords.length}`}
+      </Typography>
+      <ReactChord
+        chord={chords[index]}
+        fileAppendix={appendix}
+        germanNotation={germanNotation}
+      />
       <IconButton onClick={setPreviousIdx}>
         <ArrowBack />
       </IconButton>

@@ -248,12 +248,14 @@ interface Props {
   settings?: Partial<ChordSettings>;
   germanNotation?: boolean;
   removeTitle?: boolean;
+  fileAppendix?:string
 }
 const ReactChord: React.FC<Props> = ({
   settings,
   chord,
   germanNotation,
   removeTitle = true,
+  fileAppendix="",
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const id = useMemo(
@@ -295,7 +297,7 @@ const ReactChord: React.FC<Props> = ({
     saveSvg(
       ref.current?.children[0] as SVGSVGElement,
       chord.title
-        ? (germanNotation ? translateChordname(chord.title) : chord.title) +
+        ? (germanNotation ? translateChordname(chord.title) : chord.title) +fileAppendix+
             ".svg"
         : "chord.svg"
     );
