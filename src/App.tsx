@@ -66,10 +66,10 @@ function App() {
   ];
   const columns = [
     "",
-    "m",
     "7",
     "maj7",
     "6",
+    "m",
     "m7",
     "m6",
     "5",
@@ -102,6 +102,8 @@ function App() {
   const downloadAll = useCallback(() => {
     // const chords=Object.values(allChords).flat()
     const divs = document.querySelectorAll(".svg-wrapper");
+    let groupIdx = 0;
+    let lastGroup = "";
     const promises = [...divs].map((div) => {
       // (div as HTMLDivElement).click()
       const svg = div.children[0] as SVGSVGElement;
@@ -111,7 +113,13 @@ function App() {
       const group = chordname.includes("#")
         ? chordname.slice(0, 2)
         : chordname[0];
-      const filename = group + "/" + chordname + ".svg";
+      if (group === lastGroup) {
+        groupIdx += 1;
+      } else {
+        lastGroup = group;
+        groupIdx = 0;
+      }
+      const filename = group + "/" + groupIdx+"-"+chordname + ".svg";
       return blob.text().then((content) => ({ filename, content, blob }));
     });
     const zipFileWriter = new BlobWriter();
