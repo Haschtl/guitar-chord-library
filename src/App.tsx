@@ -68,21 +68,21 @@ function App() {
     "",
     "m",
     "7",
-    "m7",
     "maj7",
-    "sus4",
     "6",
-    "sus2",
-    "dim",
+    "m7",
     "m6",
-    "9",
-    "maj9",
-    "maj11",
-    "add9",
-    "dim7",
-    "7b5",
-    "aug",
     "5",
+    "7b5",
+    "sus2",
+    "sus4",
+    "dim",
+    "9",
+    "aug",
+    // "maj9",
+    // "maj11",
+    // "add9",
+    // "dim7",
   ];
   const defaultIndices: Record<string, number> = {
     Bm: 1,
@@ -107,7 +107,11 @@ function App() {
       const svg = div.children[0] as SVGSVGElement;
       const blob = svgElement2blob(svg);
       // const filename = chord2filename(chords.find(c=>c.title===div.id),);
-      const filename = chordId2name(div.classList[1]) + ".svg";
+      const chordname = chordId2name(div.classList[1]);
+      const group = chordname.includes("#")
+        ? chordname.slice(0, 2)
+        : chordname[0];
+      const filename = group + "/" + chordname + ".svg";
       return blob.text().then((content) => ({ filename, content, blob }));
     });
     const zipFileWriter = new BlobWriter();
