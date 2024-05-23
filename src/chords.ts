@@ -10,5 +10,19 @@ export const translateChordname = (chord: string) => {
   return chord.replace("B", "H").replace("Hb", "B");
 };
 
-export const loadChords = ()=>fetch(import.meta.env.BASE_URL+`database/completeChordsFormatted.json`)
-  .then((response) => response.json() as Promise<Chords>)
+export const loadChords = () =>
+  fetch(
+    import.meta.env.BASE_URL + `database/completeChordsFormatted.json`
+  ).then((response) => response.json() as Promise<Chords>);
+
+export function chord2filename(
+  chord: Chord,
+  fileAppendix = "",
+  germanNotation = false
+) {
+  return chord.title
+    ? (germanNotation ? translateChordname(chord.title) : chord.title) +
+        fileAppendix +
+        ".svg"
+    : "chord.svg";
+}

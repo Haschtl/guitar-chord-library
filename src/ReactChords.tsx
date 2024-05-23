@@ -8,9 +8,10 @@ import { ArrowBack, ArrowForward } from "@mui/icons-material";
 interface Props {
   chords?: Chord[];
   germanNotation?: boolean;
+  defaultIndex?:number
 }
-const ReactChords: React.FC<Props> = ({ chords = [], germanNotation }) => {
-  const [index, setIndex] = useState(0);
+const ReactChords: React.FC<Props> = ({ chords = [],defaultIndex=0, germanNotation }) => {
+  const [index, setIndex] = useState(defaultIndex);
   const setSmartIndex = useCallback(
     (step: number) => {
       setIndex((chords.length + index + step) % chords.length);

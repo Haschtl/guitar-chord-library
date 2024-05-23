@@ -1,19 +1,21 @@
-import { Box, Grid, Paper, Typography } from "@mui/material";
+import { Box, Button, Grid, Paper, Typography } from "@mui/material";
 import "./App.css";
 import ReactChords from "./ReactChords";
 import { Chords, loadChords, translateChordname } from "./chords";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { chordId2name, saveBlob, svgElement2blob } from "./helper";
+import { ZipWriter, BlobReader, BlobWriter } from "@zip.js/zip.js";
 
-const fixChordName=(name:string)=>{
+const fixChordName = (name: string) => {
   return name;
   // return name.replace("#m", "m#");
-}
+};
 function App() {
   // console.log(allChordNames);
-  const [allChords,setAllChords]=useState<Chords>({})
-  useEffect(()=>{
-    loadChords().then(chords=>setAllChords(chords))
-  },[])
+  const [allChords, setAllChords] = useState<Chords>({});
+  useEffect(() => {
+    loadChords().then((chords) => setAllChords(chords));
+  }, []);
   // const chord: Chord = {
   //   // array of [string, fret, text | options]
   //   fingers: [
@@ -49,6 +51,9 @@ function App() {
   // };
   const [germanNotation] = useState(true);
   const notes = [
+    "A",
+    "A#",
+    "B",
     "C",
     "C#",
     "D",
@@ -58,21 +63,18 @@ function App() {
     "F#",
     "G",
     "G#",
-    "A",
-    "A#",
-    "B",
   ];
   const columns = [
     "",
     "m",
     "7",
     "m7",
-    "sus2",
-    "sus4",
-    "dim",
-    "6",
-    "m6",
     "maj7",
+    "sus4",
+    "6",
+    "sus2",
+    "dim",
+    "m6",
     "9",
     "maj9",
     "maj11",
@@ -82,6 +84,54 @@ function App() {
     "aug",
     "5",
   ];
+  const defaultIndices: Record<string, number> = {
+    Bm: 1,
+    Asus4: 1,
+    Bsus4: 3,
+    Bm7: 2,
+    Cmaj7: 1,
+    C6: 1,
+    Esus4: 1,
+    Esus2: 1,
+    F7: 1,
+    Fsus4: 1,
+    Fsus2: 2,
+    Gm: 1,
+    Gmaj7: 2,
+  };
+  const downloadAll = useCallback(() => {
+    // const chords=Object.values(allChords).flat()
+    const divs = document.querySelectorAll(".svg-wrapper");
+    const promises = [...divs].map((div) => {
+      // (div as HTMLDivElement).click()
+      const svg = div.children[0] as SVGSVGElement;
+      const blob = svgElement2blob(svg);
+      // const filename = chord2filename(chords.find(c=>c.title===div.id),);
+      const filename = chordId2name(div.classList[1]) + ".svg";
+      return blob.text().then((content) => ({ filename, content, blob }));
+    });
+    const zipFileWriter = new BlobWriter();
+    const zipWriter = new ZipWriter(zipFileWriter);
+    Promise.all(promises)
+      .then(async (files) => {
+        for (const { filename, blob } of files) {
+          // return await Promise.all(
+          // files.map(async ({ filename, blob }) => {
+          // await zipWriter.add(filename, new TextReader(content));
+          // console.log(`Zipping ${filename}`)
+          await zipWriter.add(filename, new BlobReader(blob));
+        }
+        await zipWriter.close();
+        // )
+        // );
+      })
+      .then(() => {
+        zipFileWriter.getData().then((zipFileBlob) => {
+          return saveBlob(zipFileBlob, "chords.zip");
+        });
+        // console.log("TOO EARLY")
+      });
+  }, []);
   return (
     <Box sx={{ flexGrow: 1, minWidth: "2000px" }}>
       <Grid container spacing={1} columns={columns.length}>
@@ -89,7 +139,7 @@ function App() {
           <>
             {columns.map((ext) => {
               const chordName = fixChordName(note + ext);
-              
+
               return (
                 <Grid key={chordName} item xs={1}>
                   <Paper>
@@ -100,6 +150,7 @@ function App() {
                     </Typography>
                     <ReactChords
                       chords={allChords[chordName]}
+                      defaultIndex={defaultIndices[chordName]}
                       germanNotation={germanNotation}
                     />
                   </Paper>
@@ -109,6 +160,7 @@ function App() {
           </>
         ))}
       </Grid>
+      <Button onClick={downloadAll}>Download all selected</Button>
     </Box>
   );
 }

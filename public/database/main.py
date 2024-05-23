@@ -23,7 +23,7 @@ def reverse(num: int|None):
     return reversedArray[num]
 
 
-def getLastDuplicateIndex(fingerGoal, fingeringsArray):
+def getLastDuplicateIndex(fingerGoal, fingeringsArray:list[str] ):
     for f in range(len(fingeringsArray) - 1, -1, -1):
         if int(fingeringsArray[f]) == fingerGoal:
             return f
@@ -55,87 +55,112 @@ def parseChords():
         export[key] = []
 
         for variation in data[key]:
-            base = 1
-            positions = variation["positions"]
-            fingerings = variation["fingerings"][0]
-            lowestFret = 24
-            highestFret = 0
+            try:
+                base = 1
+                positions = list(variation["positions"])
+                fingerings = list(variation["fingerings"][0])
+                lowestFret = 24
+                highestFret = 0
 
-            for position in positions:
+                for position in positions:
 
-                if position == "x":
-                    continue
+                    if position == "x":
+                        continue
 
-                posNumber = int(position)
+                    posNumber = int(position)
 
-                if posNumber < lowestFret:
-                    lowestFret = posNumber
+                    if posNumber < lowestFret:
+                        lowestFret = posNumber
 
-                if posNumber > highestFret:
-                    highestFret = posNumber
+                    if posNumber > highestFret:
+                        highestFret = posNumber
 
-            if highestFret >= 5:
-                base = lowestFret
-            tuning=positions2tuning(positions)#,base-1)
+                if highestFret >= 5:
+                    base = lowestFret
+                    
+                
+                if base<=2:
+                    base=1
+                tuning=positions2tuning(positions)#,base-1)
 
-            fingers = []
-            barres = []
+                fingers = []
+                barres = []
 
-            for i in range(6):
 
-                if positions[i] != "x":
-                    positions[i] = 1 + int(positions[i]) - base
-                    if addFingerings and int(fingerings[i])>0:
-                        fingers.append([reverse(i + 1), positions[i], fingerings[i]])
+                for i in range(6):
+
+                    if positions[i] != "x":
+                        positions[i] = 1 + int(positions[i]) - base
+                        if addFingerings and int(fingerings[i])>0:
+                            fingers.append([reverse(i + 1), positions[i], fingerings[i]])
+                        else:
+                            fingers.append([reverse(i + 1), positions[i]])
                     else:
                         fingers.append([reverse(i + 1), positions[i]])
-                else:
-                    fingers.append([reverse(i + 1), positions[i]])
 
-            for i in range(6):
-                finger = int(fingerings[i])
+                for i in range(6):
+                    finger = int(fingerings[i])
 
-                if finger == 0:
-                    continue
+                    if finger == 0:
+                        continue
 
-                last: int|None = getLastDuplicateIndex(finger, fingerings)
+                    last: int|None = getLastDuplicateIndex(finger, fingerings)
+                    if len(fingerings)!=6:
+                        print(variation)
+                        
+                    # START: Dirty fingering fix 
+                    if last and last>0:
+                        # new_last=last
+                        while last<5:
+                        # while new_last<5:
+                        # for x in range(last,5):
+                            if fingerings[last-1]==fingerings[last] and positions[last-1]==positions[last] and positions[last+1]==positions[last] and positions[last+1]!="x":
+                                fingerings[last+1]=fingerings[last]
+                                last+=1
+                            else:
+                                break
+                    # END: Dirty fingering fix 
+                    
+                    if last == i:
+                        continue
 
-                if last == i:
-                    continue
+                    if fingerings[i] != fingerings[last] or positions[i] != positions[last]:
+                        continue
 
-                if fingerings[i] != fingerings[last] or positions[i] != positions[last]:
-                    continue
+                    validBarre = True
+                    for barre in barres:
+                        if barre["fret"] == positions[i]:
+                            validBarre = False
+                            break
 
-                validBarre = True
-                for barre in barres:
-                    if barre["fret"] == positions[i]:
-                        validBarre = False
-                        break
+                    if not validBarre:
+                        continue
 
-                if not validBarre:
-                    continue
+                    barres.append({
+                        "fromString": reverse(i) - 1,
+                        "toString": reverse(last) - 1,
+                        "fret": positions[i]
+                    })
+                        
+                fingers.reverse()
+                fingersToRemove = []
 
-                barres.append({
-                    "fromString": reverse(i) - 1,
-                    "toString": reverse(last) - 1,
-                    "fret": positions[i]
-                })
+                for i in range(6):
+                    for barre in barres:
+                        if barre["fret"] == fingers[i][1]:
+                            fingersToRemove.append(fingers[i])
+                            if addFingerings:
+                                barre["text"]=fingers[i][2]
 
-            fingers.reverse()
-            fingersToRemove = []
+                for finger in fingersToRemove:
+                    fingers.remove(finger)
+                    
 
-            for i in range(6):
-                for barre in barres:
-                    if barre["fret"] == fingers[i][1]:
-                        fingersToRemove.append(fingers[i])
-                        if addFingerings:
-                            barre["text"]=fingers[i][2]
-
-            for finger in fingersToRemove:
-                fingers.remove(finger)
-
-            newObject = {"title": key, "fingers": fingers, "barres": barres, "position": base, "tuning": tuning}
-            export[key].append(newObject)
+                newObject = {"title": key, "fingers": fingers, "barres": barres, "position": base, "tuning": tuning}
+                export[key].append(newObject)
+            except Exception as e:
+                print(f'Error in {key}, {variation}\nPositions: {positions}\nFingerings: {fingerings}')
+                raise e
 
     def writeToFile(fileName):
         if os.path.exists(fileName):

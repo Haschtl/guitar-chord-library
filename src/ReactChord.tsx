@@ -7,27 +7,8 @@ import {
   Orientation,
   FretLabelPosition,
 } from "svguitar";
-import { translateChordname } from "./chords";
-
-const chordName2id = (name: string) => {
-  return name.replace("#", "is");
-};
-
-function saveSvg(svgEl: SVGSVGElement, name: string) {
-  svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-  const svgData = svgEl.outerHTML;
-  const preface = '<?xml version="1.0" standalone="no"?>\r\n';
-  const svgBlob = new Blob([preface, svgData], {
-    type: "image/svg+xml;charset=utf-8",
-  });
-  const svgUrl = URL.createObjectURL(svgBlob);
-  const downloadLink = document.createElement("a");
-  downloadLink.href = svgUrl;
-  downloadLink.download = name;
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-}
+import { chord2filename, translateChordname } from "./chords";
+import { chordName2id, saveSvg } from "./helper";
 
 const defaultSettings: ChordSettings = {
   // Customizations (all optional, defaults shown)
@@ -248,14 +229,14 @@ interface Props {
   settings?: Partial<ChordSettings>;
   germanNotation?: boolean;
   removeTitle?: boolean;
-  fileAppendix?:string
+  fileAppendix?: string;
 }
 const ReactChord: React.FC<Props> = ({
   settings,
   chord,
   germanNotation,
   removeTitle = true,
-  fileAppendix="",
+  fileAppendix = "",
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const id = useMemo(
@@ -296,16 +277,14 @@ const ReactChord: React.FC<Props> = ({
     //get svg element.
     saveSvg(
       ref.current?.children[0] as SVGSVGElement,
-      chord.title
-        ? (germanNotation ? translateChordname(chord.title) : chord.title) +fileAppendix+
-            ".svg"
-        : "chord.svg"
+      chord2filename(chord, fileAppendix, germanNotation)
     );
   };
 
   return (
     <div
       id={`${id}`}
+      className={`svg-wrapper ${id}${fileAppendix}`}
       style={{ cursor: "pointer" }}
       onClick={download}
       ref={ref}
