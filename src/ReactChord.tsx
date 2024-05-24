@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   SVGuitarChord,
   ChordSettings,
@@ -6,9 +6,13 @@ import {
   ChordStyle,
   Orientation,
   FretLabelPosition,
+  Finger,
 } from "svguitar";
 import { chord2filename, translateChordname } from "./chords";
 import { chordName2id, saveSvg } from "./helper";
+import { Box, Button, Modal, Typography } from "@mui/material";
+import { Editor, OnChange, OnMount } from "@monaco-editor/react";
+import { editor } from "monaco-editor";
 
 const defaultSettings: ChordSettings = {
   // Customizations (all optional, defaults shown)
@@ -224,6 +228,36 @@ const defaultSettings: ChordSettings = {
   // svgTitle: "Guitar chord diagram of F# minor",
 };
 
+const useSVGuitarChord = (
+  id: string,
+  chord: Chord,
+  options: {
+    settings?: Partial<ChordSettings>;
+    extraSettings?: ChordExtraSettings;
+    germanNotation?: boolean;
+    removeTitle?: boolean;
+  }
+) => {
+  const [chart, setChart] = useState<SVGuitarChord>();
+
+  useEffect(() => {
+    const query = "#" + id;
+    if (document.querySelector(query)) {
+      const c = new SVGuitarChord(query);
+      setChart(c);
+      return () => {
+        c.remove();
+        setChart(undefined);
+      };
+    }
+  }, [id]);
+
+  useEffect(() => {
+    // draw the chart
+    if (chart) drawSvg(chart, chord, options);
+  }, [chart, chord, options]);
+};
+
 export interface ChordExtraSettings {
   showNoteNames: boolean;
   showFingerings: boolean;
@@ -233,15 +267,89 @@ const defaultChordExtraSettings: ChordExtraSettings = {
   showNoteNames: true,
   showFingerings: true,
 };
+type ChordPlus = Chord & { tuning?: string[] };
 
 interface Props {
-  chord: Chord & { tuning?: string[] };
+  chord: ChordPlus;
   settings?: Partial<ChordSettings>;
   extraSettings?: ChordExtraSettings;
   germanNotation?: boolean;
   removeTitle?: boolean;
   fileAppendix?: string;
 }
+
+const configureChordSettings = (
+  chord: ChordPlus,
+  options: {
+    germanNotation?: boolean;
+    removeTitle?: boolean;
+    settings?: Partial<ChordSettings>;
+    extraSettings?: Partial<ChordExtraSettings>;
+  }
+): ChordSettings => {
+  const extraSettings = {
+    ...defaultChordExtraSettings,
+    ...options.extraSettings,
+  };
+  return {
+    ...defaultSettings,
+    tuning: !extraSettings.showNoteNames
+      ? undefined
+      : options.germanNotation
+      ? chord.tuning?.map((t) => translateChordname(t))
+      : chord.tuning,
+    svgTitle: chord.title
+      ? `Guitar chord diagram of ${
+          options.germanNotation ? translateChordname(chord.title) : chord.title
+        }`
+      : undefined,
+    ...options.settings,
+  };
+};
+
+const configureChord = (
+  chord: ChordPlus,
+  options: {
+    germanNotation?: boolean;
+    removeTitle?: boolean;
+    settings?: Partial<ChordSettings>;
+    extraSettings?: Partial<ChordExtraSettings>;
+  }
+): ChordPlus => {
+  const extraSettings = {
+    ...defaultChordExtraSettings,
+    ...options.extraSettings,
+  };
+  return {
+    ...chord,
+    title:
+      options.removeTitle || !chord.title
+        ? undefined
+        : translateChordname(chord.title),
+    // // @ts-expect-error tuning is actually a valid key
+    // tuning: extraSettings.showFingerings ? chord.tuning : undefined,
+    fingers: extraSettings.showFingerings
+      ? chord.fingers
+      : chord.fingers.map((f) => [f[0], f[1]] as Finger),
+    barres: extraSettings.showFingerings
+      ? chord.barres
+      : chord.barres.map((b) => ({ ...b, text: undefined })),
+    tuning: extraSettings.showNoteNames ? chord.tuning : undefined,
+  };
+};
+const drawSvg = (
+  chart: SVGuitarChord,
+  chord: Chord,
+  options: {
+    germanNotation?: boolean;
+    removeTitle?: boolean;
+    settings?: Partial<ChordSettings>;
+    extraSettings?: Partial<ChordExtraSettings>;
+  }
+) => {
+  chart.configure(configureChordSettings(chord, options)).chord(chord).draw();
+};
+
 const ReactChord: React.FC<Props> = ({
   settings,
   chord,
@@ -250,77 +358,155 @@ const ReactChord: React.FC<Props> = ({
   fileAppendix = "",
   extraSettings,
 }) => {
-  const _extraSettings = useMemo(
-    () => ({ ...defaultChordExtraSettings, ...extraSettings }),
-    [extraSettings]
-  );
   const ref = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const handleOpen = useCallback(() => setOpen(true), []);
+  const handleClose = useCallback(() => setOpen(false), []);
+  const [chordState, _setChordState] = useState<ChordPlus>(chord);
+  const [chordStateStr, _setChordStateStr] = useState<string>(
+    JSON.stringify(chord, null, 4)
+  );
+  // const configuredChordState = useMemo(
+  //   () =>
+  //     configureChord(chordState, {
+  //       settings,
+  //       extraSettings,
+  //       germanNotation,
+  //       removeTitle,
+  //     }),
+  //   [chordState, extraSettings, germanNotation, removeTitle, settings]
+  // );
+  const setChordState = useCallback((chord: ChordPlus, resetEditor = false) => {
+    try {
+      const chordStr = JSON.stringify(chord, null, 4);
+      _setChordStateStr(chordStr);
+      _setChordState(chord);
+      if (resetEditor) {
+        editorRef.current?.getModel()?.setValue(chordStr);
+      }
+    } catch {
+      console.log("JSON malformed");
+    }
+  }, []);
+  useEffect(() => {
+    console.log("Reset chord");
+    setChordState(
+      configureChord(chord, {
+        settings,
+        extraSettings,
+        germanNotation,
+        removeTitle,
+      })
+    );
+  }, [
+    chord,
+    setChordState,
+    extraSettings,
+    germanNotation,
+    removeTitle,
+    settings,
+  ]);
+  const setChordStateByString: OnChange = useCallback((e) => {
+    if (e)
+      try {
+        // setChordState(JSON.parse(e));
+        _setChordStateStr(e);
+        _setChordState(JSON.parse(e));
+      } catch {
+        console.log("ups");
+      }
+  }, []);
+  const editorRef = useRef<editor.IStandaloneCodeEditor>();
+
+  const handleEditorDidMount: OnMount = useCallback((editor) => {
+    editorRef.current = editor;
+  }, []);
+
   const id = useMemo(
     () => chordName2id(String(chord.title) ?? "chart"),
     [chord.title]
   );
-  const [chart, setChart] = useState<SVGuitarChord>();
+  const id2 = useMemo(
+    () => (!open ? "x" : chordName2id(String(chord.title) ?? "chart") + "---2"),
+    [open, chord.title]
+  );
+  useSVGuitarChord(id, chordState, {
+    settings,
+    extraSettings,
+    germanNotation,
+    removeTitle,
+  });
 
-  useEffect(() => {
-    const c = new SVGuitarChord("#" + id);
-    setChart(c);
-
-    return () => {
-      c.remove();
-    };
-  }, [id]);
-
-  useEffect(() => {
-    // draw the chart
-    chart
-      ?.configure({
-        ...defaultSettings,
-        tuning: !_extraSettings.showNoteNames
-          ? undefined
-          : germanNotation
-          ? chord.tuning?.map((t) => translateChordname(t))
-          : chord.tuning,
-        svgTitle: chord.title
-          ? `Guitar chord diagram of ${
-              germanNotation ? translateChordname(chord.title) : chord.title
-            }`
-          : undefined,
-        ...settings,
-      })
-      .chord({
-        ...chord,
-        title:
-          removeTitle || !chord.title
-            ? undefined
-            : translateChordname(chord.title),
-        // // @ts-expect-error tuning is actually a valid key
-        // tuning: _extraSettings.showFingerings ? chord.tuning : undefined,
-        fingers: _extraSettings.showFingerings
-          ? chord.fingers
-          : chord.fingers.map((f) => [f[0], f[1]]),
-        barres: _extraSettings.showFingerings
-          ? chord.barres
-          : chord.barres.map((b) => ({ ...b, text: undefined })),
-      })
-      .draw();
-  }, [chart, chord, settings, germanNotation, removeTitle, _extraSettings]);
-
+  useSVGuitarChord(id2, chordState, {
+    settings,
+    extraSettings,
+    germanNotation,
+    removeTitle,
+  });
   const download = () => {
     //get svg element.
     saveSvg(
       ref.current?.children[0] as SVGSVGElement,
-      chord2filename(chord, fileAppendix, germanNotation)
+      chord2filename(chordState, fileAppendix, germanNotation)
     );
   };
 
   return (
-    <div
-      id={`${id}`}
-      className={`svg-wrapper ${id}${fileAppendix}`}
-      style={{ cursor: "pointer" }}
-      onClick={download}
-      ref={ref}
-    ></div>
+    <>
+      <div
+        id={`${id}`}
+        className={`svg-wrapper ${id}${fileAppendix}`}
+        style={{ cursor: "pointer" }}
+        onClick={handleOpen}
+        // ref={ref}
+      ></div>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+        keepMounted
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            {id}
+          </Typography>
+          <div
+            id={`${id2}`}
+            className={`svg-wrapper ${id}${fileAppendix}`}
+            style={{ cursor: "pointer" }}
+            // onClick={handleOpen}
+            ref={ref}
+          ></div>
+          <Editor
+            key={`${id}${fileAppendix}`}
+            width="100%"
+            height="600px"
+            defaultLanguage="json"
+            theme="vs-dark"
+            // defaultValue={chordStateStr}
+            value={chordStateStr}
+            // options={options}
+            onChange={setChordStateByString}
+            onMount={handleEditorDidMount}
+            // editorDidMount={::this.editorDidMount}
+          />
+          <Button onClick={download}>Download</Button>
+        </Box>
+      </Modal>
+    </>
   );
 };
 
