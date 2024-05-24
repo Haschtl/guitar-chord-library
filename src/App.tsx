@@ -9,15 +9,21 @@ import {
   Paper,
   Select,
   SelectChangeEvent,
+  TextField,
   Typography,
 } from "@mui/material";
 import "./App.css";
 import ReactChords from "./ReactChords";
 import { Chords, loadChords, translateChordname } from "./chords";
-import { useCallback, useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { chordId2name, saveBlob, svgElement2blob } from "./helper";
 import { ZipWriter, BlobReader, BlobWriter } from "@zip.js/zip.js";
-// import { ChordSettings } from "svguitar";
+import {
+  ChordSettings,
+  ChordStyle,
+  FretLabelPosition,
+  Orientation,
+} from "svguitar";
 import { ChordExtraSettings } from "./ReactChord";
 
 const fixChordName = (name: string) => {
@@ -31,15 +37,50 @@ function App() {
     loadChords().then((chords) => setAllChords(chords));
   }, []);
 
-  // const [settings, setSettings] = useState<Partial<ChordSettings>>({});
+  const [settings, setSettings] = useState<Partial<ChordSettings>>({
+    style: ChordStyle.normal,
+    orientation: Orientation.vertical,
+    fretLabelPosition: FretLabelPosition.RIGHT,
+    frets: 5,
+    fretLabelFontSize: 38,
+    tuningsFontSize: 20,
+    fingerSize: 0.65,
+    fingerColor: "#000",
+    fingerTextColor: "#FFF",
+    fingerTextSize: 22,
+    fingerStrokeColor: "#000000",
+    fingerStrokeWidth: 0,
+    barreChordStrokeColor: "#000000",
+    barreChordStrokeWidth: 0,
+    fretSize: 1,
+    sidePadding: 0.2,
+    titleFontSize: 48,
+    titleBottomMargin: 0,
+    barreChordRadius: 0.5,
+    emptyStringIndicatorSize: 0.6,
+    strokeWidth: 2,
+    nutWidth: 10,
+    color: "#000000",
+    titleColor:""
+  });
+  const setSettingsAtKey = useCallback(
+    (key: keyof ChordSettings, value: string | number | boolean | string[]) => {
+      setSettings((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
   const [extraSettings, setExtraSettings] = useState<ChordExtraSettings>({
     showFingerings: true,
     showNoteNames: true,
   });
   const [germanNotation, setGermanNotation] = useState(false);
+  const [showTitle, setShowTitle] = useState(false);
 
   const toggleGermanNotation = useCallback(() => {
     setGermanNotation((prev) => !prev);
+  }, []);
+  const toggleShowTitle = useCallback(() => {
+    setShowTitle((prev) => !prev);
   }, []);
 
   const toggleShowNoteNames = useCallback(() => {
@@ -208,7 +249,29 @@ function App() {
             }
             label="German notation (B->H)"
           />
+          <FormControlLabel
+            control={<Checkbox checked={showTitle} onClick={toggleShowTitle} />}
+            label="Show title"
+          />
         </FormGroup>
+
+        <Box
+          component="form"
+          sx={{
+            "& .MuiTextField-root": { m: 1, width: "25ch" },
+          }}
+          noValidate
+          autoComplete="off"
+        >
+          {Object.keys(settings).map((key) => (
+            <Setting
+              key={key}
+              Key={key as keyof ChordSettings}
+              value={settings[key as keyof ChordSettings]}
+              onChange={setSettingsAtKey}
+            />
+          ))}
+        </Box>
       </Grid>
       <Grid container spacing={1} columns={variants.length}>
         {notes.map((note) => (
@@ -229,7 +292,8 @@ function App() {
                       defaultIndex={defaultIndices[chordName]}
                       germanNotation={germanNotation}
                       extraSettings={extraSettings}
-                      // settings={settings}
+                      removeTitle={!showTitle}
+                      settings={settings}
                     />
                   </Paper>
                 </Grid>
@@ -244,3 +308,67 @@ function App() {
 }
 
 export default App;
+
+const Setting: React.FC<{
+  Key: keyof ChordSettings;
+  value?: string | number | boolean | string[];
+  onChange: (
+    key: keyof ChordSettings,
+    value: string | number | boolean | string[]
+  ) => void;
+}> = ({ Key, onChange, value }) => {
+  const _onChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (typeof value === "number") {
+        onChange(Key, Number(e.target.value));
+      } else if (typeof value === "boolean") {
+        onChange(Key, Boolean(e.target.value));
+      } else {
+        onChange(Key, e.target.value);
+      }
+    },
+    [onChange, Key, value]
+  );
+  const _onChange2 = useCallback(
+    (e: SelectChangeEvent<string>) => {
+      onChange(Key, e.target.value);
+    },
+    [onChange, Key, value]
+  );
+  if (Key === "style") {
+    return (
+      <Select value={value as string} onChange={_onChange2}>
+        <MenuItem value={ChordStyle.normal}>Normal</MenuItem>
+        <MenuItem value={ChordStyle.handdrawn}>Handdrawn</MenuItem>
+      </Select>
+    );
+  } else if (Key === "orientation") {
+    return (
+      <Select value={value as string} onChange={_onChange2}>
+        <MenuItem value={Orientation.vertical}>Vertical</MenuItem>
+        <MenuItem value={Orientation.horizontal}>Horizontal</MenuItem>
+      </Select>
+    );
+  } else if (Key === "fretLabelPosition") {
+    return (
+      <Select value={value as string} onChange={_onChange2}>
+        <MenuItem value={FretLabelPosition.RIGHT}>Right</MenuItem>
+        <MenuItem value={FretLabelPosition.LEFT}>Left</MenuItem>
+      </Select>
+    );
+  }
+  return (
+    <TextField
+      onChange={_onChange}
+      value={value}
+      label={Key}
+      type={
+        typeof value === "number"
+          ? "number"
+          : typeof value === "boolean"
+          ? "checkbox"
+          : "text"
+      }
+    />
+  );
+};

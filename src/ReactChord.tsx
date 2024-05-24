@@ -167,30 +167,30 @@ const defaultSettings: ChordSettings = {
    */
   noPosition: false,
 
-  /**
-   * The color of the title (overrides color)
-   */
-  titleColor: "#000000",
+  // /**
+  //  * The color of the title (overrides color)
+  //  */
+  // titleColor: "#000000",
 
-  /**
-   * The color of the strings (overrides color)
-   */
-  stringColor: "#000000",
+  // /**
+  //  * The color of the strings (overrides color)
+  //  */
+  // stringColor: "#000000",
 
-  /**
-   * The color of the fret position (overrides color)
-   */
-  fretLabelColor: "#000000",
+  // /**
+  //  * The color of the fret position (overrides color)
+  //  */
+  // fretLabelColor: "#000000",
 
-  /**
-   * The color of the tunings (overrides color)
-   */
-  tuningsColor: "#000000",
+  // /**
+  //  * The color of the tunings (overrides color)
+  //  */
+  // tuningsColor: "#000000",
 
-  /**
-   * The color of the frets (overrides color)
-   */
-  fretColor: "#000000",
+  // /**
+  //  * The color of the frets (overrides color)
+  //  */
+  // fretColor: "#000000",
 
   /**
    * When set to true the distance between the chord diagram and the top of the SVG stayes the same,
@@ -289,7 +289,10 @@ const ReactChord: React.FC<Props> = ({
       })
       .chord({
         ...chord,
-        title: removeTitle ? undefined : chord.title,
+        title:
+          removeTitle || !chord.title
+            ? undefined
+            : translateChordname(chord.title),
         // // @ts-expect-error tuning is actually a valid key
         // tuning: _extraSettings.showFingerings ? chord.tuning : undefined,
         fingers: _extraSettings.showFingerings

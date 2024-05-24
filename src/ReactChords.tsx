@@ -11,6 +11,7 @@ interface Props {
   defaultIndex?: number;
   settings?: ChordSettings;
   extraSettings?: ChordExtraSettings;
+  removeTitle?: boolean;
 }
 const ReactChords: React.FC<Props> = ({
   chords = [],
@@ -18,6 +19,7 @@ const ReactChords: React.FC<Props> = ({
   germanNotation,
   settings,
   extraSettings,
+  removeTitle,
 }) => {
   const [index, setIndex] = useState(defaultIndex);
   const setSmartIndex = useCallback(
@@ -64,6 +66,7 @@ const ReactChords: React.FC<Props> = ({
         {`${index + 1}/${chords.length}`}
       </Typography>
       <ReactChord
+        removeTitle={removeTitle}
         chord={chords[index]}
         fileAppendix={appendix}
         germanNotation={germanNotation}
