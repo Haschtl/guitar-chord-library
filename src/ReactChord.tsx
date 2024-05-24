@@ -342,6 +342,19 @@ const configureChord = (
     tuning: extraSettings.showNoteNames ? chord.tuning : undefined,
   };
 };
+const hashCode = (value: string) => {
+  let hash = 0,
+    i,
+    chr;
+  if (value.length === 0) return hash;
+  for (i = 0; i < value.length; i++) {
+    chr = value.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash.toString(36);
+};
+
 const drawSvg = (
   chart: SVGuitarChord,
   chord: Chord,
@@ -381,19 +394,21 @@ const ReactChord: React.FC<Props> = ({
   //     }),
   //   [chordState, extraSettings, germanNotation, removeTitle, settings]
   // );
-  const setChordState = useCallback((chord: ChordPlus, resetEditor = false) => {
+  const [edited, setEdited] = useState(false);
+  const setChordState = useCallback((chord: ChordPlus) => {
     try {
       const chordStr = JSON.stringify(chord, null, 4);
       _setChordStateStr(chordStr);
       _setChordState(chord);
-      if (resetEditor) {
-        editorRef.current?.getModel()?.setValue(chordStr);
-      }
+      setEdited(false);
+      // if (resetEditor) {
+      //   editorRef.current?.getModel()?.setValue(chordStr);
+      // }
     } catch {
       console.log("JSON malformed");
     }
   }, []);
-  useEffect(() => {
+  const reset = useCallback(() => {
     setChordState(
       configureChord(chord, {
         settings,
@@ -410,16 +425,24 @@ const ReactChord: React.FC<Props> = ({
     removeTitle,
     settings,
   ]);
-  const setChordStateByString: OnChange = useCallback((e) => {
-    if (e)
-      try {
-        // setChordState(JSON.parse(e));
-        _setChordStateStr(e);
-        _setChordState(JSON.parse(e));
-      } catch {
-        console.log("ups");
-      }
-  }, []);
+  useEffect(() => {
+    reset();
+  }, [reset]);
+  const setChordStateByString: OnChange = useCallback(
+    (e) => {
+      if (e !== chordStateStr)
+        if (e)
+          try {
+            // setChordState(JSON.parse(e));
+            _setChordStateStr(e);
+            _setChordState(JSON.parse(e));
+            setEdited(true);
+          } catch {
+            console.log("ups");
+          }
+    },
+    [chordStateStr]
+  );
   const editorRef = useRef<editor.IStandaloneCodeEditor>();
 
   const handleEditorDidMount: OnMount = useCallback((editor) => {
@@ -451,7 +474,15 @@ const ReactChord: React.FC<Props> = ({
     //get svg element.
     saveSvg(
       ref.current?.children[0] as SVGSVGElement,
-      chord2filename(chordState, fileAppendix, germanNotation)
+      chord2filename(
+        chordState,
+        !edited
+          ? fileAppendix
+          : fileAppendix.replace(".svg", "") +
+              "-"+hashCode(JSON.stringify(chordState)) +
+              ".svg",
+        germanNotation
+      )
     );
   };
 
@@ -507,6 +538,9 @@ const ReactChord: React.FC<Props> = ({
             onMount={handleEditorDidMount}
             // editorDidMount={::this.editorDidMount}
           />
+          <Button onClick={reset} disabled={!edited}>
+            Reset
+          </Button>
           <Button onClick={download}>Download</Button>
         </Box>
       </Modal>
