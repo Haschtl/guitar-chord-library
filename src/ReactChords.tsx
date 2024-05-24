@@ -40,7 +40,7 @@ const chordAppendix = (chords: Chord[], index: number) => {
 };
 const allAppendixes = (chords: Chord[]) => {
   return chords
-    .map((v, i) => chordAppendix(chords, i))
+    .map((_, i) => chordAppendix(chords, i))
     // .filter((v, i, a) => a.indexOf(v) === i);
 };
 const EMPTY_STR = "-";
