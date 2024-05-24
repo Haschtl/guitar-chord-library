@@ -254,7 +254,12 @@ const useSVGuitarChord = (
 
   useEffect(() => {
     // draw the chart
-    if (chart) drawSvg(chart, chord, options);
+    if (chart)
+      drawSvg(
+        chart,
+        { ...chord, barres: chord.barres ?? [], fingers: chord.fingers ?? [] },
+        options
+      );
   }, [chart, chord, options]);
 };
 

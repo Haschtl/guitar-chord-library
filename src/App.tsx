@@ -1,6 +1,12 @@
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
+  Card,
+  CardContent,
+  CardHeader,
   Checkbox,
   FormControlLabel,
   FormGroup,
@@ -25,6 +31,7 @@ import {
   Orientation,
 } from "svguitar";
 import { ChordExtraSettings } from "./ReactChord";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const fixChordName = (name: string) => {
   return name;
@@ -115,7 +122,20 @@ function App() {
     Object.keys(allChords)
       ?.filter((c) => c.startsWith(allNotes[1]))
       .map((c) => c.replace(allNotes[1], "")) ?? [];
-  const [notes, setNotes] = useState(allNotes);
+  const [notes, setNotes] = useState([
+    "A",
+    // "A#",
+    "B",
+    "C",
+    // "C#",
+    "D",
+    // "D#",
+    "E",
+    "F",
+    // "F#",
+    "G",
+    // "G#",
+  ]);
   const [variants, setVariants] = useState([
     "",
     "7",
@@ -125,12 +145,12 @@ function App() {
     "m7",
     "m6",
     "5",
-    "7b5",
-    "sus2",
-    "sus4",
-    "dim",
-    "9",
-    "aug",
+    // "7b5",
+    // "sus2",
+    // "sus4",
+    // "dim",
+    // "9",
+    // "aug",
     // "maj9",
     // "maj11",
     // "add9",
@@ -204,75 +224,104 @@ function App() {
       });
   }, []);
   return (
-    <Box sx={{ flexGrow: 1, minWidth: "2000px" }}>
-      <Grid container spacing={1} columns={variants.length}>
-        <Select multiple value={notes} onChange={notesChanged}>
-          {allNotes.map((n) => (
-            <MenuItem value={n} key={n}>
-              {n}
-            </MenuItem>
-          ))}
-        </Select>
-        <Select multiple value={variants} onChange={variantsChanged}>
-          {allVariants.map((n) => (
-            <MenuItem value={n} key={n}>
-              {n === "" ? "Dur" : n}
-            </MenuItem>
-          ))}
-        </Select>
-
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={extraSettings.showFingerings}
-                onClick={toggleShowNoteFingerings}
+    <Box sx={{ flexGrow: 1 }}>
+      <Grid container spacing={1} gap={2}>
+        <Card>
+          <CardHeader title={"Chord-Selection"} />
+          <CardContent>
+            <FormGroup>
+              <Select multiple value={notes} onChange={notesChanged}>
+                {allNotes.map((n) => (
+                  <MenuItem value={n} key={n}>
+                    {n}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Select multiple value={variants} onChange={variantsChanged}>
+                {allVariants.map((n) => (
+                  <MenuItem value={n} key={n}>
+                    {n === "" ? "Dur" : n}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormGroup>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader title={"Display"} />
+          <CardContent>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={extraSettings.showFingerings}
+                    onClick={toggleShowNoteFingerings}
+                  />
+                }
+                label="Show fingering"
               />
-            }
-            label="Show fingering"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={extraSettings.showNoteNames}
-                onClick={toggleShowNoteNames}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={extraSettings.showNoteNames}
+                    onClick={toggleShowNoteNames}
+                  />
+                }
+                label="Show notes"
               />
-            }
-            label="Show notes"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={germanNotation}
-                onClick={toggleGermanNotation}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={germanNotation}
+                    onClick={toggleGermanNotation}
+                  />
+                }
+                label="German notation (B->H)"
               />
-            }
-            label="German notation (B->H)"
-          />
-          <FormControlLabel
-            control={<Checkbox checked={showTitle} onClick={toggleShowTitle} />}
-            label="Show title"
-          />
-        </FormGroup>
-
-        <Box
-          component="form"
-          sx={{
-            "& .MuiTextField-root": { m: 1, width: "25ch" },
-          }}
-          noValidate
-          autoComplete="off"
-        >
-          {Object.keys(settings).map((key) => (
-            <Setting
-              key={key}
-              Key={key as keyof ChordSettings}
-              value={settings[key as keyof ChordSettings]}
-              onChange={setSettingsAtKey}
-            />
-          ))}
-        </Box>
+              <FormControlLabel
+                control={
+                  <Checkbox checked={showTitle} onClick={toggleShowTitle} />
+                }
+                label="Show title"
+              />
+            </FormGroup>
+          </CardContent>
+        </Card>
+        <Card >
+          <CardHeader title={"Appearance"} />
+          <CardContent>
+            <Accordion>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1-content"
+                id="panel1-header"
+              >
+                Expand
+              </AccordionSummary>
+              <AccordionDetails>
+                <Box
+                  component="form"
+                  sx={{
+                    "& .MuiTextField-root": { m: 1, width: "25ch" },
+                  }}
+                  noValidate
+                  autoComplete="off"
+                >
+                  {Object.keys(settings).map((key) => (
+                    <Setting
+                      key={key}
+                      Key={key as keyof ChordSettings}
+                      value={settings[key as keyof ChordSettings]}
+                      onChange={setSettingsAtKey}
+                    />
+                  ))}
+                </Box>
+              </AccordionDetails>
+            </Accordion>
+          </CardContent>
+        </Card>
       </Grid>
+      <br />
       <Grid container spacing={1} columns={variants.length}>
         {notes.map((note) => (
           <>
