@@ -36,6 +36,11 @@ function App() {
     showFingerings: true,
     showNoteNames: true,
   });
+  const [germanNotation, setGermanNotation] = useState(false);
+
+  const toggleGermanNotation = useCallback(() => {
+    setGermanNotation((prev) => !prev);
+  }, []);
 
   const toggleShowNoteNames = useCallback(() => {
     setExtraSettings((prev) => ({
@@ -51,7 +56,6 @@ function App() {
     }));
   }, []);
 
-  const [germanNotation] = useState(true);
   const allNotes = [
     "A",
     "A#",
@@ -194,6 +198,15 @@ function App() {
               />
             }
             label="Show notes"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={germanNotation}
+                onClick={toggleGermanNotation}
+              />
+            }
+            label="German notation (B->H)"
           />
         </FormGroup>
       </Grid>
