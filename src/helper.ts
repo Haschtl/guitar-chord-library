@@ -1,9 +1,8 @@
-
 export const chordName2id = (name: string) => {
-  return name.replace("#", "is");
+  return name.replace("#", "is").replace("#", "is").replace("/", "_");
 };
 export const chordId2name = (name: string) => {
-  return name.replace("is", "#");
+  return name.replace("is", "#").replace("is", "#").replace("_", "/");
 };
 
 export function svgElement2blob(svgEl: SVGSVGElement) {

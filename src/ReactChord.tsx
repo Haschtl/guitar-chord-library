@@ -112,7 +112,7 @@ const defaultSettings: ChordSettings = {
   /**
    * The font family used for all letters and numbers
    */
-  fontFamily: 'Arial',
+  fontFamily: "Arial",
 
   // /**
   //  * Default title of the chart if no title is provided
@@ -216,7 +216,7 @@ const defaultSettings: ChordSettings = {
   /**
    * Font-family of the watermark (overrides fontFamily)
    */
-  watermarkFontFamily: 'Arial',
+  watermarkFontFamily: "Arial",
 
   // /**
   //  * The title of the SVG. This is not visible in the SVG, but can be used for accessibility.
@@ -224,9 +224,20 @@ const defaultSettings: ChordSettings = {
   // svgTitle: "Guitar chord diagram of F# minor",
 };
 
+export interface ChordExtraSettings {
+  showNoteNames: boolean;
+  showFingerings: boolean;
+}
+
+const defaultChordExtraSettings: ChordExtraSettings = {
+  showNoteNames: true,
+  showFingerings: true,
+};
+
 interface Props {
   chord: Chord & { tuning?: string[] };
   settings?: Partial<ChordSettings>;
+  extraSettings?: ChordExtraSettings;
   germanNotation?: boolean;
   removeTitle?: boolean;
   fileAppendix?: string;
@@ -237,7 +248,12 @@ const ReactChord: React.FC<Props> = ({
   germanNotation,
   removeTitle = true,
   fileAppendix = "",
+  extraSettings,
 }) => {
+  const _extraSettings = useMemo(
+    () => ({ ...defaultChordExtraSettings, ...extraSettings }),
+    [extraSettings]
+  );
   const ref = useRef<HTMLDivElement>(null);
   const id = useMemo(
     () => chordName2id(String(chord.title) ?? "chart"),
@@ -259,7 +275,9 @@ const ReactChord: React.FC<Props> = ({
     chart
       ?.configure({
         ...defaultSettings,
-        tuning: germanNotation
+        tuning: !_extraSettings.showNoteNames
+          ? undefined
+          : germanNotation
           ? chord.tuning?.map((t) => translateChordname(t))
           : chord.tuning,
         svgTitle: chord.title
@@ -269,9 +287,20 @@ const ReactChord: React.FC<Props> = ({
           : undefined,
         ...settings,
       })
-      .chord({ ...chord, title: removeTitle ? undefined : chord.title })
+      .chord({
+        ...chord,
+        title: removeTitle ? undefined : chord.title,
+        // // @ts-expect-error tuning is actually a valid key
+        // tuning: _extraSettings.showFingerings ? chord.tuning : undefined,
+        fingers: _extraSettings.showFingerings
+          ? chord.fingers
+          : chord.fingers.map((f) => [f[0], f[1]]),
+        barres: _extraSettings.showFingerings
+          ? chord.barres
+          : chord.barres.map((b) => ({ ...b, text: undefined })),
+      })
       .draw();
-  }, [chart, chord, settings, germanNotation, removeTitle]);
+  }, [chart, chord, settings, germanNotation, removeTitle, _extraSettings]);
 
   const download = () => {
     //get svg element.

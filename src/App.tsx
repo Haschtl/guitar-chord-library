@@ -1,10 +1,24 @@
-import { Box, Button, Grid, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Grid,
+  MenuItem,
+  Paper,
+  Select,
+  SelectChangeEvent,
+  Typography,
+} from "@mui/material";
 import "./App.css";
 import ReactChords from "./ReactChords";
 import { Chords, loadChords, translateChordname } from "./chords";
 import { useCallback, useEffect, useState } from "react";
 import { chordId2name, saveBlob, svgElement2blob } from "./helper";
 import { ZipWriter, BlobReader, BlobWriter } from "@zip.js/zip.js";
+// import { ChordSettings } from "svguitar";
+import { ChordExtraSettings } from "./ReactChord";
 
 const fixChordName = (name: string) => {
   return name;
@@ -16,41 +30,29 @@ function App() {
   useEffect(() => {
     loadChords().then((chords) => setAllChords(chords));
   }, []);
-  // const chord: Chord = {
-  //   // array of [string, fret, text | options]
-  //   fingers: [
-  //     // finger at string 1, fret 2, with text '2'
-  //     [1, 2, "2"],
 
-  //     // finger at string 2, fret 3, with text '3', colored red and has class '.red'
-  //     [2, 3, { text: "3", color: "#F00", className: "red" }],
+  // const [settings, setSettings] = useState<Partial<ChordSettings>>({});
+  const [extraSettings, setExtraSettings] = useState<ChordExtraSettings>({
+    showFingerings: true,
+    showNoteNames: true,
+  });
 
-  //     // finger is triangle shaped
-  //     [3, 3, { shape: Shape.TRIANGLE }],
-  //     [6, "x"],
-  //   ],
+  const toggleShowNoteNames = useCallback(() => {
+    setExtraSettings((prev) => ({
+      ...prev,
+      showNoteNames: !prev.showNoteNames,
+    }));
+  }, []);
 
-  //   // optional: barres for barre chords
-  //   barres: [
-  //     {
-  //       fromString: 5,
-  //       toString: 1,
-  //       fret: 1,
-  //       text: "1",
-  //       color: "#0F0",
-  //       textColor: "#F00",
-  //       className: "my-barre-chord",
-  //     },
-  //   ],
+  const toggleShowNoteFingerings = useCallback(() => {
+    setExtraSettings((prev) => ({
+      ...prev,
+      showFingerings: !prev.showFingerings,
+    }));
+  }, []);
 
-  //   // title of the chart (optional)
-  //   title: "F# minor",
-
-  //   // position (defaults to 1)
-  //   position: 2,
-  // };
   const [germanNotation] = useState(true);
-  const notes = [
+  const allNotes = [
     "A",
     "A#",
     "B",
@@ -64,7 +66,12 @@ function App() {
     "G",
     "G#",
   ];
-  const columns = [
+  const allVariants =
+    Object.keys(allChords)
+      ?.filter((c) => c.startsWith(allNotes[1]))
+      .map((c) => c.replace(allNotes[1], "")) ?? [];
+  const [notes, setNotes] = useState(allNotes);
+  const [variants, setVariants] = useState([
     "",
     "7",
     "maj7",
@@ -83,7 +90,14 @@ function App() {
     // "maj11",
     // "add9",
     // "dim7",
-  ];
+  ]);
+
+  const notesChanged = useCallback((e: SelectChangeEvent<string[]>) => {
+    setNotes(e.target.value as string[]);
+  }, []);
+  const variantsChanged = useCallback((e: SelectChangeEvent<string[]>) => {
+    setVariants(e.target.value as string[]);
+  }, []);
   const defaultIndices: Record<string, number> = {
     Bm: 1,
     Asus4: 1,
@@ -119,7 +133,7 @@ function App() {
         lastGroup = group;
         groupIdx = 0;
       }
-      const filename = group + "/" + groupIdx+"-"+chordname + ".svg";
+      const filename = group + "/" + groupIdx + "-" + chordname + ".svg";
       return blob.text().then((content) => ({ filename, content, blob }));
     });
     const zipFileWriter = new BlobWriter();
@@ -146,15 +160,52 @@ function App() {
   }, []);
   return (
     <Box sx={{ flexGrow: 1, minWidth: "2000px" }}>
-      <Grid container spacing={1} columns={columns.length}>
+      <Grid container spacing={1} columns={variants.length}>
+        <Select multiple value={notes} onChange={notesChanged}>
+          {allNotes.map((n) => (
+            <MenuItem value={n} key={n}>
+              {n}
+            </MenuItem>
+          ))}
+        </Select>
+        <Select multiple value={variants} onChange={variantsChanged}>
+          {allVariants.map((n) => (
+            <MenuItem value={n} key={n}>
+              {n === "" ? "Dur" : n}
+            </MenuItem>
+          ))}
+        </Select>
+
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={extraSettings.showFingerings}
+                onClick={toggleShowNoteFingerings}
+              />
+            }
+            label="Show fingering"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={extraSettings.showNoteNames}
+                onClick={toggleShowNoteNames}
+              />
+            }
+            label="Show notes"
+          />
+        </FormGroup>
+      </Grid>
+      <Grid container spacing={1} columns={variants.length}>
         {notes.map((note) => (
           <>
-            {columns.map((ext) => {
+            {variants.map((ext) => {
               const chordName = fixChordName(note + ext);
 
               return (
                 <Grid key={chordName} item xs={1}>
-                  <Paper>
+                  <Paper sx={{ height: "100%" }}>
                     <Typography variant="subtitle2">
                       {germanNotation
                         ? translateChordname(chordName)
@@ -164,6 +215,8 @@ function App() {
                       chords={allChords[chordName]}
                       defaultIndex={defaultIndices[chordName]}
                       germanNotation={germanNotation}
+                      extraSettings={extraSettings}
+                      // settings={settings}
                     />
                   </Paper>
                 </Grid>

@@ -1,6 +1,6 @@
-import { Chord } from "svguitar";
+import { Chord, ChordSettings } from "svguitar";
 import "./App.css";
-import ReactChord from "./ReactChord";
+import ReactChord, { ChordExtraSettings } from "./ReactChord";
 import { useCallback, useState } from "react";
 import { IconButton, Typography } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
@@ -8,9 +8,17 @@ import { ArrowBack, ArrowForward } from "@mui/icons-material";
 interface Props {
   chords?: Chord[];
   germanNotation?: boolean;
-  defaultIndex?:number
+  defaultIndex?: number;
+  settings?: ChordSettings;
+  extraSettings?: ChordExtraSettings;
 }
-const ReactChords: React.FC<Props> = ({ chords = [],defaultIndex=0, germanNotation }) => {
+const ReactChords: React.FC<Props> = ({
+  chords = [],
+  defaultIndex = 0,
+  germanNotation,
+  settings,
+  extraSettings,
+}) => {
   const [index, setIndex] = useState(defaultIndex);
   const setSmartIndex = useCallback(
     (step: number) => {
@@ -27,8 +35,9 @@ const ReactChords: React.FC<Props> = ({ chords = [],defaultIndex=0, germanNotati
   if (chords.length <= 0) {
     return (
       <>
-        <Typography variant="caption">
-          {`${index + 1}/${chords.length}`}
+        <Typography variant="h4" marginTop="50%">
+          {/* {`${index + 1}/${chords.length}`} */}
+          n.A.
         </Typography>
       </>
     );
@@ -47,7 +56,7 @@ const ReactChords: React.FC<Props> = ({ chords = [],defaultIndex=0, germanNotati
     appendix += "-" + position + "fr";
   }
   if (numIdenticalPositions > 1) {
-    appendix += "-v"+positionIndex;
+    appendix += "-v" + positionIndex;
   }
   return (
     <>
@@ -58,6 +67,8 @@ const ReactChords: React.FC<Props> = ({ chords = [],defaultIndex=0, germanNotati
         chord={chords[index]}
         fileAppendix={appendix}
         germanNotation={germanNotation}
+        settings={settings}
+        extraSettings={extraSettings}
       />
       <IconButton onClick={setPreviousIdx}>
         <ArrowBack />
