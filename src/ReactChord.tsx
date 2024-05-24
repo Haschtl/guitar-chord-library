@@ -394,7 +394,6 @@ const ReactChord: React.FC<Props> = ({
     }
   }, []);
   useEffect(() => {
-    console.log("Reset chord");
     setChordState(
       configureChord(chord, {
         settings,
