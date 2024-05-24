@@ -61,7 +61,7 @@ function App() {
     strokeWidth: 2,
     nutWidth: 10,
     color: "#000000",
-    titleColor:""
+    titleColor: "",
   });
   const setSettingsAtKey = useCallback(
     (key: keyof ChordSettings, value: string | number | boolean | string[]) => {
@@ -281,7 +281,14 @@ function App() {
 
               return (
                 <Grid key={chordName} item xs={1}>
-                  <Paper sx={{ height: "100%" }}>
+                  <Paper
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                    }}
+                  >
                     <Typography variant="subtitle2">
                       {germanNotation
                         ? translateChordname(chordName)

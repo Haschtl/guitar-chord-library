@@ -17,12 +17,11 @@ export const loadChords = () =>
 
 export function chord2filename(
   chord: Chord,
-  fileAppendix = "",
+  fileAppendix = ".svg",
   germanNotation = false
 ) {
   return chord.title
     ? (germanNotation ? translateChordname(chord.title) : chord.title) +
-        fileAppendix +
-        ".svg"
-    : "chord.svg";
+        fileAppendix
+    : "chord" + fileAppendix;
 }

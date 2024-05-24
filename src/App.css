@@ -40,3 +40,18 @@
 .read-the-docs {
   color: #888;
 }
+
+.button-bar {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.variant-select {
+  flex: 1;
+}
+.variant-select .MuiSelect-select {
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
