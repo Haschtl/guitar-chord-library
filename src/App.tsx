@@ -32,6 +32,7 @@ import {
 } from "svguitar";
 import { ChordExtraSettings } from "./ReactChord";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { MuiColorInput } from "mui-color-input";
 
 const fixChordName = (name: string) => {
   return name;
@@ -61,6 +62,7 @@ function App() {
     barreChordStrokeWidth: 0,
     fretSize: 1,
     sidePadding: 0.2,
+    fontFamily: "Arial",
     titleFontSize: 48,
     titleBottomMargin: 0,
     barreChordRadius: 0.5,
@@ -68,7 +70,12 @@ function App() {
     strokeWidth: 2,
     nutWidth: 10,
     color: "#000000",
-    titleColor: "",
+    // titleColor: "",
+    noPosition: false,
+    fixedDiagramPosition: false,
+    watermarkFontSize: 12,
+    watermarkColor: "#000000",
+    watermarkFontFamily: "Arial",
   });
   const setSettingsAtKey = useCallback(
     (key: keyof ChordSettings, value: string | number | boolean | string[]) => {
@@ -287,7 +294,7 @@ function App() {
             </FormGroup>
           </CardContent>
         </Card>
-        <Card >
+        <Card>
           <CardHeader title={"Appearance"} />
           <CardContent>
             <Accordion>
@@ -391,6 +398,15 @@ const Setting: React.FC<{
     },
     [onChange, Key, value]
   );
+  const handleColorChange = useCallback(
+    (v: string) => {
+      onChange(Key, v);
+    },
+    [Key, onChange]
+  );
+  const toggleValue = useCallback(() => {
+    onChange(Key, !value);
+  }, [Key, onChange, value]);
   if (Key === "style") {
     return (
       <Select value={value as string} onChange={_onChange2}>
@@ -411,6 +427,17 @@ const Setting: React.FC<{
         <MenuItem value={FretLabelPosition.RIGHT}>Right</MenuItem>
         <MenuItem value={FretLabelPosition.LEFT}>Left</MenuItem>
       </Select>
+    );
+  } else if (typeof value === "boolean") {
+    return (
+      <FormControlLabel
+        control={<Checkbox checked={value} onClick={toggleValue} />}
+        label={Key}
+      />
+    );
+  } else if (typeof value === "string" && value.startsWith("#")) {
+    return (
+      <MuiColorInput format="hex" label={Key} value={value} onChange={handleColorChange} />
     );
   }
   return (
