@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import "./App.css";
 import ReactChords from "./ReactChords";
-import { Chords, loadChords, translateChordname } from "./chords";
+import { Chords, loadChords, normal2germanNotation } from "./chords";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { chordId2name, saveBlob, svgElement2blob } from "./helper";
 import { ZipWriter, BlobReader, BlobWriter } from "@zip.js/zip.js";
@@ -30,7 +30,7 @@ import {
   FretLabelPosition,
   Orientation,
 } from "svguitar";
-import { ChordExtraSettings } from "./ReactChord";
+import { ChordExtraSettings } from "./ReactChordMui";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { MuiColorInput } from "mui-color-input";
 
@@ -347,7 +347,7 @@ function App() {
                   >
                     <Typography variant="subtitle2">
                       {germanNotation
-                        ? translateChordname(chordName)
+                        ? normal2germanNotation(chordName)
                         : chordName}
                     </Typography>
                     <ReactChords

@@ -1,6 +1,6 @@
 import { Chord, ChordSettings } from "svguitar";
 import "./App.css";
-import ReactChord, { ChordExtraSettings } from "./ReactChord";
+import ReactChord, { ChordExtraSettings } from "./ReactChordMui";
 import { useCallback, useMemo, useState } from "react";
 import {
   IconButton,

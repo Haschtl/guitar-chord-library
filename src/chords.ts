@@ -6,8 +6,13 @@ export type Chords = Record<string, Chord[]>;
 // export const allChords: Chords = chords as any;
 // export const allChordNames = Object.keys(allChords);
 
-export const translateChordname = (chord: string) => {
-  return chord.replace("B", "H").replace("Hb", "B");
+
+export const normal2germanNotation = (chord: string) => {
+  return chord.replace(/B/g, "H").replace(/Hb/g, "B");
+};
+
+export const german2normalNotation = (chord: string) => {
+  return chord.replace(/H/g, "B").replace(/B/, "Bb");
 };
 
 export const loadChords = () =>
@@ -21,7 +26,7 @@ export function chord2filename(
   germanNotation = false
 ) {
   return chord.title
-    ? (germanNotation ? translateChordname(chord.title) : chord.title) +
+    ? (germanNotation ? normal2germanNotation(chord.title) : chord.title) +
         fileAppendix
     : "chord" + fileAppendix;
 }
