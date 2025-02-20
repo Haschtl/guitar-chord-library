@@ -1,4 +1,4 @@
-import { Chord } from "svguitar";
+import type { Chord } from "svguitar";
 // import chords from "../public/database/completeChordsFormatted.json";
 
 export type Chords = Record<string, Chord[]>;
@@ -7,18 +7,14 @@ export type Chords = Record<string, Chord[]>;
 // export const allChordNames = Object.keys(allChords);
 
 
-export const normal2germanNotation = (chord: string) => {
-  return chord.replace(/B/g, "H").replace(/Hb/g, "B");
-};
+export const normal2germanNotation = (chord: string) => chord.replace(/B/g, "H").replace(/Hb/g, "B");
 
-export const german2normalNotation = (chord: string) => {
-  return chord.replace(/H/g, "B").replace(/B/, "Bb");
-};
+export const german2normalNotation = (chord: string) => chord.replace(/H/g, "B").replace(/B/, "Bb");
 
-export const loadChords = () =>
-  fetch(
+export const loadChords = async () =>
+  await fetch(
     import.meta.env.BASE_URL + `database/completeChordsFormatted.json`
-  ).then((response) => response.json() as Promise<Chords>);
+  ).then(async (response) => await (response.json() as Promise<Chords>));
 
 export function chord2filename(
   chord: Chord,

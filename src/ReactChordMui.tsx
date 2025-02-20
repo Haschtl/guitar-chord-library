@@ -1,25 +1,56 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Editor, type OnChange, type OnMount } from "@monaco-editor/react";
 import {
-  ChordSettings,
-} from "svguitar";
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import type { editor } from "monaco-editor";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import type { ChordSettings } from "svguitar";
+
 import { chord2filename } from "./chords";
 import { chordName2id, saveSvg } from "./helper";
-import { Box, Button, Modal, Typography } from "@mui/material";
-import { Editor, OnChange, OnMount } from "@monaco-editor/react";
-import { editor } from "monaco-editor";
-import { ChordExtraSettings, ChordPlus, configureChord, hashCode, useSVGuitarChord } from "./ReactChord";
+import {
+  type ChordExtraSettings,
+  type ChordPlus,
+  configureChord,
+  ReactChord,
+  useSVGuitarChord,
+} from "./ReactChord";
 
+export const hashCode = (value: string) => {
+  let chr: number | null = null;
+  let hash = 0;
+  if (value.length === 0) return hash;
+  for (let i = 0; i < value.length; i++) {
+    chr = value.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    // Convert to 32bit integer
+    hash |= 0;
+  }
+  return hash.toString(36);
+};
 
 interface Props {
   chord: ChordPlus;
-  settings?: Partial<ChordSettings>;
   extraSettings?: ChordExtraSettings;
+  fileAppendix?: string;
   germanNotation?: boolean;
   removeTitle?: boolean;
-  fileAppendix?: string;
+  settings?: Partial<ChordSettings>;
 }
 
-const ReactChord: React.FC<Props> = ({
+const ReactChordMui: React.FC<Props> = ({
   settings,
   chord,
   germanNotation,
@@ -27,14 +58,31 @@ const ReactChord: React.FC<Props> = ({
   fileAppendix = "",
   extraSettings,
 }) => {
-  const ref = useRef<HTMLDivElement>(null);
+  const [edited, setEdited] = useState(false);
   const [open, setOpen] = useState(false);
-  const handleOpen = useCallback(() => setOpen(true), []);
-  const handleClose = useCallback(() => setOpen(false), []);
-  const [chordState, _setChordState] = useState<ChordPlus>(chord);
-  const [chordStateStr, _setChordStateStr] = useState<string>(
+  const [chordState, setChordState] = useState<ChordPlus>(chord);
+  const [chordStateStr, setChordStateStr] = useState<string>(
     JSON.stringify(chord, null, 4)
   );
+  const ref = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<editor.IStandaloneCodeEditor>(null);
+
+  const id = useMemo(
+    () => chordName2id(String(chord.title ?? "chart")),
+    [chord.title]
+  );
+  // const id2 = useMemo(
+  //   () =>
+  //     !open ? "x" : chordName2id(String(chord.title ?? "chart")) + "-modal",
+  //   [open, chord.title]
+  // );
+
+  const handleOpen = useCallback(() => {
+    setOpen(true);
+  }, []);
+  const handleClose = useCallback(() => {
+    setOpen(false);
+  }, []);
   // const configuredChordState = useMemo(
   //   () =>
   //     configureChord(chordState, {
@@ -45,12 +93,11 @@ const ReactChord: React.FC<Props> = ({
   //     }),
   //   [chordState, extraSettings, germanNotation, removeTitle, settings]
   // );
-  const [edited, setEdited] = useState(false);
-  const setChordState = useCallback((chord: ChordPlus) => {
+  const setAllChordStates = useCallback((chord: ChordPlus) => {
     try {
       const chordStr = JSON.stringify(chord, null, 4);
-      _setChordStateStr(chordStr);
-      _setChordState(chord);
+      setChordStateStr(chordStr);
+      setChordState(chord);
       setEdited(false);
       // if (resetEditor) {
       //   editorRef.current?.getModel()?.setValue(chordStr);
@@ -60,68 +107,23 @@ const ReactChord: React.FC<Props> = ({
     }
   }, []);
   const reset = useCallback(() => {
-    setChordState(
+    setAllChordStates(
       configureChord(chord, {
-        settings,
         extraSettings,
         germanNotation,
         removeTitle,
+        settings,
       })
     );
   }, [
     chord,
-    setChordState,
+    setAllChordStates,
     extraSettings,
     germanNotation,
     removeTitle,
     settings,
   ]);
-  useEffect(() => {
-    reset();
-  }, [reset]);
-  const setChordStateByString: OnChange = useCallback(
-    (e) => {
-      if (e !== chordStateStr)
-        if (e)
-          try {
-            // setChordState(JSON.parse(e));
-            _setChordStateStr(e);
-            _setChordState(JSON.parse(e));
-            setEdited(true);
-          } catch {
-            console.error("ups");
-          }
-    },
-    [chordStateStr]
-  );
-  const editorRef = useRef<editor.IStandaloneCodeEditor>();
-
-  const handleEditorDidMount: OnMount = useCallback((editor) => {
-    editorRef.current = editor;
-  }, []);
-
-  const id = useMemo(
-    () => chordName2id(String(chord.title) ?? "chart"),
-    [chord.title]
-  );
-  const id2 = useMemo(
-    () => (!open ? "x" : chordName2id(String(chord.title) ?? "chart") + "---2"),
-    [open, chord.title]
-  );
-  useSVGuitarChord(id, chordState, {
-    settings,
-    extraSettings,
-    germanNotation,
-    removeTitle,
-  });
-
-  useSVGuitarChord(id2, chordState, {
-    settings,
-    extraSettings,
-    germanNotation,
-    removeTitle,
-  });
-  const download = () => {
+  const download = useCallback(() => {
     //get svg element.
     saveSvg(
       ref.current?.children[0] as SVGSVGElement,
@@ -130,73 +132,140 @@ const ReactChord: React.FC<Props> = ({
         !edited
           ? fileAppendix
           : fileAppendix.replace(".svg", "") +
-              "-"+hashCode(JSON.stringify(chordState)) +
+              "-" +
+              hashCode(JSON.stringify(chordState)) +
               ".svg",
         germanNotation
       )
     );
-  };
+  }, [chordState, edited, fileAppendix, germanNotation]);
+  const setChordStateByString: OnChange = useCallback(
+    (e) => {
+      if (e && e !== chordStateStr)
+        try {
+          // setAllChordStates(JSON.parse(e));
+          setChordStateStr(e);
+          setChordState(JSON.parse(e) as ChordPlus);
+          setEdited(true);
+        } catch {
+          console.error("ups");
+        }
+    },
+    [chordStateStr]
+  );
+
+  const handleEditorDidMount: OnMount = useCallback((editor) => {
+    editorRef.current = editor;
+  }, []);
+
+  useEffect(() => {
+    reset();
+  }, [reset]);
+
+  useSVGuitarChord(id, chordState, {
+    extraSettings,
+    germanNotation,
+    removeTitle,
+    settings,
+  });
+  const theme = useTheme();
+  const smallScreen = useMediaQuery(theme.breakpoints.down("md"));
+  // useSVGuitarChord(id2, chordState, {
+  //   extraSettings,
+  //   germanNotation,
+  //   removeTitle,
+  //   settings,
+  // });
 
   return (
     <>
-      <div
-        id={`${id}`}
-        className={`svg-wrapper ${id}${fileAppendix}`}
-        style={{ cursor: "pointer" }}
+      <Button
+        // className={`svg-wrapper ${id}${fileAppendix}`}
+        // id={id}
         onClick={handleOpen}
+        // style={{ cursor: "pointer" }}
+        // type="button"
         // ref={ref}
-      ></div>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-        keepMounted
       >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            border: "2px solid #000",
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            {id}
-          </Typography>
+        <div
+          className={`svg-wrapper ${id}`}
+          id={id}
+          style={{ textTransform: "none", width: "100%" }}
+        />
+        {/* <ReactChord
+          chord={chordState}
+          fileAppendix={fileAppendix}
+          extraSettings={extraSettings}
+          germanNotation={germanNotation}
+          removeTitle={removeTitle}
+          settings={settings}
+        /> */}
+      </Button>
+      <Dialog
+        aria-describedby="modal-modal-description"
+        aria-labelledby="modal-modal-title"
+        fullScreen={smallScreen}
+        fullWidth
+        onClose={handleClose}
+        open={open}
+        // keepMounted
+      >
+        <DialogTitle>{id}</DialogTitle>
+        <DialogContent>
           <div
-            id={`${id2}`}
+            style={{
+              alignItems: "center",
+              display: "flex",
+              flexDirection: smallScreen ? "column" : "row",
+            }}
+          >
+            <ReactChord
+              chord={chordState}
+              extraSettings={extraSettings}
+              fileAppendix={fileAppendix}
+              germanNotation={germanNotation}
+              id={"-modal"}
+              ref={ref}
+              removeTitle={removeTitle}
+              settings={settings}
+              style={{
+                height: "100%",
+                minHeight: "100px",
+                minWidth: "200px",
+                width: "100%",
+              }}
+            />
+            {/* <div
             className={`svg-wrapper ${id}${fileAppendix}`}
+            id={id2}
+            ref={ref}
             style={{ cursor: "pointer" }}
             // onClick={handleOpen}
-            ref={ref}
-          ></div>
-          <Editor
-            key={`${id}${fileAppendix}`}
-            width="100%"
-            height="600px"
-            defaultLanguage="json"
-            theme="vs-dark"
-            // defaultValue={chordStateStr}
-            value={chordStateStr}
-            // options={options}
-            onChange={setChordStateByString}
-            onMount={handleEditorDidMount}
-            // editorDidMount={::this.editorDidMount}
-          />
-          <Button onClick={reset} disabled={!edited}>
-            Reset
-          </Button>
-          <Button onClick={download}>Download</Button>
-        </Box>
-      </Modal>
+          /> */}
+            <Editor
+              defaultLanguage="json"
+              // defaultValue={chordStateStr}
+              height="600px"
+              key={`${id}${fileAppendix}`}
+              onChange={setChordStateByString}
+              onMount={handleEditorDidMount}
+              theme="vs-dark"
+              value={chordStateStr}
+              width="100%"
+              // options={options}
+              // editorDidMount={::this.editorDidMount}
+            />
+          </div>
+          <DialogActions>
+            <Button disabled={!edited} onClick={reset}>
+              Reset
+            </Button>
+            <Button onClick={download}>Download</Button>
+          </DialogActions>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
 
-export default ReactChord;
+export default ReactChordMui;

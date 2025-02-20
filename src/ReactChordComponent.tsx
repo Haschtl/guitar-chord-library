@@ -1,104 +1,116 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ChordExtraSettings, ChordPlus, configureChord, useSVGuitarChord } from "./ReactChord";
-import { ChordSettings } from "svguitar";
-import { chordName2id } from "./helper";
+// import React, { useCallback, useEffect, useMemo, useState } from "react";
+// import type { ChordSettings } from "svguitar";
 
-interface Props
-  extends Partial<
-    React.DetailedHTMLProps<
-      React.HTMLAttributes<HTMLDivElement>,
-      HTMLDivElement
-    >
-  > {
-  chord: ChordPlus | string;
-  settings?: Partial<ChordSettings>;
-  extraSettings?: ChordExtraSettings;
-  germanNotation?: boolean;
-  removeTitle?: boolean;
-  fileAppendix?: string;
-}
-const jsonRead = (v?: string) => {
-  if (v)
-    try {
-      return JSON.parse(v);
-    } catch {
-      console.error("ups");
-    }
-};
-const p = (chord: ChordPlus | string) =>
-  typeof chord === "string" ? jsonRead(chord) : chord;
+// import { chordName2id } from "./helper";
+// import {
+//   type ChordExtraSettings,
+//   type ChordPlus,
+//   configureChord,
+//   useSVGuitarChord,
+// } from "./ReactChord";
 
-const ReactChordComponent: React.FC<Props> = ({
-  id: idPlus,
-  chord,
-  settings,
-  extraSettings,
-  germanNotation,
-  removeTitle,
-  fileAppendix,
-  ...props
-}) => {
-  const id = useMemo(
-    () => idPlus??chordName2id(String(p(chord).title) ?? "chart"),
-    [chord, idPlus]
-  );
-  const [chordState, _setChordState] = useState<ChordPlus>(p(chord));
+// interface Props
+//   extends Partial<
+//     React.DetailedHTMLProps<
+//       React.HTMLAttributes<HTMLDivElement>,
+//       HTMLDivElement
+//     >
+//   > {
+//   chord: ChordPlus | string;
+//   extraSettings?: ChordExtraSettings;
+//   fileAppendix?: string;
+//   germanNotation?: boolean;
+//   removeTitle?: boolean;
+//   settings?: Partial<ChordSettings>;
+// }
+// // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+// function jsonRead<T extends Record<string, unknown>>(v?: string): T | null {
+//   if (v)
+//     try {
+//       return JSON.parse(v) as T;
+//     } catch {
+//       console.error("ups");
+//       return null;
+//     }
+//   return null;
+// }
+// function p(chord: ChordPlus | string) {
+//   return typeof chord === "string" ? jsonRead<ChordPlus>(chord) : chord;
+// }
 
-  const setChordState = useCallback((chord: ChordPlus) => {
-    try {
-      //   const chordStr = JSON.stringify(chord, null, 4);
-      //   _setChordStateStr(chordStr);
-      _setChordState(chord);
-      //   setEdited(false);
-      // if (resetEditor) {
-      //   editorRef.current?.getModel()?.setValue(chordStr);
-      // }
-    } catch {
-      console.error("JSON malformed");
-    }
-  }, []);
-  //   const setChordStateByString = useCallback((v: string) => {
-  //     const x = jsonRead(v);
-  //     if (x) {
-  //       _setChordState(x);
-  //     }
-  //   }, []);
-  const reset = useCallback(() => {
-    setChordState(
-      configureChord(p(chord), {
-        settings,
-        extraSettings,
-        germanNotation,
-        removeTitle,
-      })
-    );
-  }, [
-    chord,
-    setChordState,
-    extraSettings,
-    germanNotation,
-    removeTitle,
-    settings,
-  ]);
-  useEffect(() => {
-    reset();
-  }, [reset]);
+// const ReactChordComponent: React.FC<Props> = ({
+//   id: idPlus,
+//   chord,
+//   settings,
+//   extraSettings,
+//   germanNotation,
+//   removeTitle,
+//   fileAppendix,
+//   ...props
+// }) => {
+//   const id = useMemo(
+//     () => idPlus ?? chordName2id(String(p(chord)?.title ?? "chart")),
+//     [chord, idPlus]
+//   );
+//   const [chordState, setChordState] = useState<ChordPlus | null>(p(chord));
 
-  useSVGuitarChord(id, chordState, {
-    settings,
-    extraSettings,
-    germanNotation,
-    removeTitle,
-  });
-  return (
-    <div
-      id={`${id}`}
-      className={`svg-wrapper ${id}${fileAppendix}`}
-      style={{ cursor: "pointer" }}
-      {...props}
-      // ref={ref}
-    ></div>
-  );
-};
+//   const safeSetChordState = useCallback((chord: ChordPlus) => {
+//     try {
+//       //   const chordStr = JSON.stringify(chord, null, 4);
+//       //   _setChordStateStr(chordStr);
+//       setChordState(chord);
+//       //   setEdited(false);
+//       // if (resetEditor) {
+//       //   editorRef.current?.getModel()?.setValue(chordStr);
+//       // }
+//     } catch {
+//       console.error("JSON malformed");
+//     }
+//   }, []);
+//   //   const setChordStateByString = useCallback((v: string) => {
+//   //     const x = jsonRead(v);
+//   //     if (x) {
+//   //       setChordState(x);
+//   //     }
+//   //   }, []);
+//   const reset = useCallback(() => {
+//     const c = p(chord);
+//     if (c)
+//       safeSetChordState(
+//         configureChord(c, {
+//           extraSettings,
+//           germanNotation,
+//           removeTitle,
+//           settings,
+//         })
+//       );
+//   }, [
+//     chord,
+//     safeSetChordState,
+//     extraSettings,
+//     germanNotation,
+//     removeTitle,
+//     settings,
+//   ]);
+//   useEffect(() => {
+//     reset();
+//   }, [reset]);
 
-export default ReactChordComponent;
+//   useSVGuitarChord(id, chordState ?? { barres: [], fingers: [] }, {
+//     extraSettings,
+//     germanNotation,
+//     removeTitle,
+//     settings,
+//   });
+//   return (
+//     <div
+//       className={`svg-wrapper ${id}${fileAppendix}`}
+//       id={id}
+//       style={{ cursor: "pointer" }}
+//       {...props}
+//       // ref={ref}
+//     />
+//   );
+// };
+
+// export default ReactChordComponent;

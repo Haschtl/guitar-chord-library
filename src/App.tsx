@@ -1,7 +1,11 @@
+import "./App.css";
+
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -10,124 +14,110 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid,
   MenuItem,
   Paper,
   Select,
-  SelectChangeEvent,
+  type SelectChangeEvent,
   TextField,
   Typography,
 } from "@mui/material";
-import "./App.css";
-import ReactChords from "./ReactChords";
-import { Chords, loadChords, normal2germanNotation } from "./chords";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
-import { chordId2name, saveBlob, svgElement2blob } from "./helper";
-import { ZipWriter, BlobReader, BlobWriter } from "@zip.js/zip.js";
+import Grid from "@mui/material/Grid2";
+import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
+import { MuiColorInput } from "mui-color-input";
+import React, {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
-  ChordSettings,
+  type ChordSettings,
   ChordStyle,
   FretLabelPosition,
+  type FretMarker,
   Orientation,
 } from "svguitar";
-import { ChordExtraSettings } from "./ReactChordMui";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { MuiColorInput } from "mui-color-input";
 
-const fixChordName = (name: string) => {
-  return name;
-  // return name.replace("#m", "m#");
-};
+import { type Chords, loadChords, normal2germanNotation } from "./chords";
+import { useSettings } from "./context";
+import { chordId2name, saveBlob, svgElement2blob } from "./helper";
+import ReactChords from "./ReactChords";
+
+const allNotes = [
+  "A",
+  "A#",
+  "B",
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+];
+
+const fixChordName = (name: string) => name;
+// return name.replace("#m", "m#");
 function App() {
   // console.log(allChordNames);
   const [allChords, setAllChords] = useState<Chords>({});
   useEffect(() => {
-    loadChords().then((chords) => setAllChords(chords));
+    loadChords().then((chords) => {
+      setAllChords(chords);
+    });
   }, []);
+  const {
+    settings,
+    setDisplaySetting,
+    toggleGermanNotation,
+    toggleShowNoteFingerings,
+    toggleShowNoteNames,
+    toggleShowTitle,
+  } = useSettings();
+  // const [settings, setSettings] = useState<Partial<ChordSettings>>({
+  //   barreChordRadius: 0.5,
+  //   barreChordStrokeColor: "#000000",
+  //   barreChordStrokeWidth: 0,
+  //   color: "#000000",
+  //   emptyStringIndicatorSize: 0.6,
+  //   fingerColor: "#000",
+  //   fingerSize: 0.65,
+  //   fingerStrokeColor: "#000000",
+  //   fingerStrokeWidth: 0,
+  //   fingerTextColor: "#FFF",
+  //   fingerTextSize: 22,
+  //   fixedDiagramPosition: false,
+  //   fontFamily: "Arial",
+  //   fretLabelFontSize: 38,
+  //   fretLabelPosition: FretLabelPosition.RIGHT,
+  //   fretSize: 1,
+  //   frets: 5,
+  //   noPosition: false,
+  //   nutWidth: 10,
+  //   orientation: Orientation.vertical,
+  //   sidePadding: 0.2,
+  //   strokeWidth: 2,
+  //   style: ChordStyle.normal,
+  //   titleBottomMargin: 0,
+  //   // titleColor: "",
+  //   titleFontSize: 48,
+  //   tuningsFontSize: 20,
+  //   watermarkColor: "#000000",
+  //   watermarkFontFamily: "Arial",
+  //   watermarkFontSize: 12,
+  // });
+  // const [extraSettings, setExtraSettings] = useState<ChordExtraSettings>({
+  //   showFingerings: true,
+  //   showNoteNames: true,
+  // });
+  // const [germanNotation, setGermanNotation] = useState(false);
+  // const [showTitle, setShowTitle] = useState(false);
 
-  const [settings, setSettings] = useState<Partial<ChordSettings>>({
-    style: ChordStyle.normal,
-    orientation: Orientation.vertical,
-    fretLabelPosition: FretLabelPosition.RIGHT,
-    frets: 5,
-    fretLabelFontSize: 38,
-    tuningsFontSize: 20,
-    fingerSize: 0.65,
-    fingerColor: "#000",
-    fingerTextColor: "#FFF",
-    fingerTextSize: 22,
-    fingerStrokeColor: "#000000",
-    fingerStrokeWidth: 0,
-    barreChordStrokeColor: "#000000",
-    barreChordStrokeWidth: 0,
-    fretSize: 1,
-    sidePadding: 0.2,
-    fontFamily: "Arial",
-    titleFontSize: 48,
-    titleBottomMargin: 0,
-    barreChordRadius: 0.5,
-    emptyStringIndicatorSize: 0.6,
-    strokeWidth: 2,
-    nutWidth: 10,
-    color: "#000000",
-    // titleColor: "",
-    noPosition: false,
-    fixedDiagramPosition: false,
-    watermarkFontSize: 12,
-    watermarkColor: "#000000",
-    watermarkFontFamily: "Arial",
-  });
-  const setSettingsAtKey = useCallback(
-    (key: keyof ChordSettings, value: string | number | boolean | string[]) => {
-      setSettings((prev) => ({ ...prev, [key]: value }));
-    },
-    []
-  );
-  const [extraSettings, setExtraSettings] = useState<ChordExtraSettings>({
-    showFingerings: true,
-    showNoteNames: true,
-  });
-  const [germanNotation, setGermanNotation] = useState(false);
-  const [showTitle, setShowTitle] = useState(false);
-
-  const toggleGermanNotation = useCallback(() => {
-    setGermanNotation((prev) => !prev);
-  }, []);
-  const toggleShowTitle = useCallback(() => {
-    setShowTitle((prev) => !prev);
-  }, []);
-
-  const toggleShowNoteNames = useCallback(() => {
-    setExtraSettings((prev) => ({
-      ...prev,
-      showNoteNames: !prev.showNoteNames,
-    }));
-  }, []);
-
-  const toggleShowNoteFingerings = useCallback(() => {
-    setExtraSettings((prev) => ({
-      ...prev,
-      showFingerings: !prev.showFingerings,
-    }));
-  }, []);
-
-  const allNotes = [
-    "A",
-    "A#",
-    "B",
-    "C",
-    "C#",
-    "D",
-    "D#",
-    "E",
-    "F",
-    "F#",
-    "G",
-    "G#",
-  ];
   const allVariants =
     Object.keys(allChords)
-      ?.filter((c) => c.startsWith(allNotes[1]))
+      .filter((c) => c.startsWith(allNotes[1]))
       .map((c) => c.replace(allNotes[1], "")) ?? [];
   const [notes, setNotes] = useState([
     "A",
@@ -167,21 +157,24 @@ function App() {
   const notesChanged = useCallback((e: SelectChangeEvent<string[]>) => {
     setNotes(e.target.value as string[]);
   }, []);
-  const variantsChanged = useCallback((e: SelectChangeEvent<string[]>) => {
-    setVariants(e.target.value as string[]);
-  }, []);
+  const variantsChanged = useCallback(
+    (_: React.SyntheticEvent, values: string[]) => {
+      setVariants(values);
+    },
+    []
+  );
   const defaultIndices: Record<string, number> = {
-    Bm: 1,
     Asus4: 1,
-    Bsus4: 3,
+    Bm: 1,
     Bm7: 2,
-    Cmaj7: 1,
+    Bsus4: 3,
     C6: 1,
-    Esus4: 1,
+    Cmaj7: 1,
     Esus2: 1,
+    Esus4: 1,
     F7: 1,
-    Fsus4: 1,
     Fsus2: 2,
+    Fsus4: 1,
     Gm: 1,
     Gmaj7: 2,
   };
@@ -190,7 +183,7 @@ function App() {
     const divs = document.querySelectorAll(".svg-wrapper");
     let groupIdx = 0;
     let lastGroup = "";
-    const promises = [...divs].map((div) => {
+    const promises = [...divs].map(async (div) => {
       // (div as HTMLDivElement).click()
       const svg = div.children[0] as SVGSVGElement;
       const blob = svgElement2blob(svg);
@@ -206,7 +199,8 @@ function App() {
         groupIdx = 0;
       }
       const filename = group + "/" + groupIdx + "-" + chordname + ".svg";
-      return blob.text().then((content) => ({ filename, content, blob }));
+      console.log(svg, filename);
+      return await blob.text().then((content) => ({ blob, content, filename }));
     });
     const zipFileWriter = new BlobWriter();
     const zipWriter = new ZipWriter(zipFileWriter);
@@ -223,34 +217,77 @@ function App() {
         // )
         // );
       })
-      .then(() => {
-        zipFileWriter.getData().then((zipFileBlob) => {
-          return saveBlob(zipFileBlob, "chords.zip");
+      .then(async () => {
+        await zipFileWriter.getData().then((zipFileBlob) => {
+          saveBlob(zipFileBlob, "chords.zip");
         });
-        // console.log("TOO EARLY")
-      });
+      })
+      .catch(console.error);
   }, []);
+
+  const combinations = notes.map((note) =>
+    variants.map((ext) => {
+      const chordName = fixChordName(note + ext);
+      return {
+        chordName,
+        chords: allChords[chordName],
+        defaultIndex: defaultIndices[chordName],
+        ext,
+        note,
+      };
+    })
+  );
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <Grid container spacing={1} gap={2}>
+      <Grid container gap={2} spacing={1}>
         <Card>
           <CardHeader title={"Chord-Selection"} />
           <CardContent>
             <FormGroup>
-              <Select multiple value={notes} onChange={notesChanged}>
+              <Select multiple onChange={notesChanged} value={notes}>
                 {allNotes.map((n) => (
-                  <MenuItem value={n} key={n}>
+                  <MenuItem key={n} value={n}>
                     {n}
                   </MenuItem>
                 ))}
               </Select>
-              <Select multiple value={variants} onChange={variantsChanged}>
-                {allVariants.map((n) => (
-                  <MenuItem value={n} key={n}>
+              <Autocomplete
+                multiple
+                onChange={variantsChanged}
+                options={allVariants}
+                // eslint-disable-next-line react/jsx-no-bind
+                renderInput={(params) => (
+                  <>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        maxWidth: "500px",
+                      }}
+                    >
+                      {params.InputProps.startAdornment}
+                    </div>
+                    <TextField
+                      {...params}
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: undefined,
+                      }}
+                      label="Chord-variants"
+                      multiline
+                      placeholder="Search variants..."
+                      variant="standard"
+                    />
+                  </>
+                )}
+                value={variants}
+              >
+                {/* {allVariants.map((n) => (
+                  <MenuItem key={n} value={n}>
                     {n === "" ? "Dur" : n}
                   </MenuItem>
-                ))}
-              </Select>
+                ))} */}
+              </Autocomplete>
             </FormGroup>
           </CardContent>
         </Card>
@@ -261,7 +298,7 @@ function App() {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={extraSettings.showFingerings}
+                    checked={settings.extraSettings.showFingerings}
                     onClick={toggleShowNoteFingerings}
                   />
                 }
@@ -270,7 +307,7 @@ function App() {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={extraSettings.showNoteNames}
+                    checked={settings.extraSettings.showNoteNames}
                     onClick={toggleShowNoteNames}
                   />
                 }
@@ -279,7 +316,7 @@ function App() {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={germanNotation}
+                    checked={settings.germanNotation}
                     onClick={toggleGermanNotation}
                   />
                 }
@@ -287,7 +324,10 @@ function App() {
               />
               <FormControlLabel
                 control={
-                  <Checkbox checked={showTitle} onClick={toggleShowTitle} />
+                  <Checkbox
+                    checked={settings.showTitle}
+                    onClick={toggleShowTitle}
+                  />
                 }
                 label="Show title"
               />
@@ -299,27 +339,29 @@ function App() {
           <CardContent>
             <Accordion>
               <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel1-content"
+                expandIcon={<ExpandMoreIcon />}
                 id="panel1-header"
               >
                 Expand
               </AccordionSummary>
               <AccordionDetails>
                 <Box
+                  autoComplete="off"
                   component="form"
+                  noValidate
                   sx={{
                     "& .MuiTextField-root": { m: 1, width: "25ch" },
                   }}
-                  noValidate
-                  autoComplete="off"
                 >
-                  {Object.keys(settings).map((key) => (
+                  {Object.keys(settings.displaySettings).map((key) => (
                     <Setting
-                      key={key}
                       Key={key as keyof ChordSettings}
-                      value={settings[key as keyof ChordSettings]}
-                      onChange={setSettingsAtKey}
+                      key={key}
+                      onChange={setDisplaySetting}
+                      value={
+                        settings.displaySettings[key as keyof ChordSettings]
+                      }
                     />
                   ))}
                 </Box>
@@ -329,43 +371,35 @@ function App() {
         </Card>
       </Grid>
       <br />
-      <Grid container spacing={1} columns={variants.length}>
-        {notes.map((note) => (
-          <>
-            {variants.map((ext) => {
-              const chordName = fixChordName(note + ext);
-
-              return (
-                <Grid key={chordName} item xs={1}>
-                  <Paper
-                    sx={{
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Typography variant="subtitle2">
-                      {germanNotation
-                        ? normal2germanNotation(chordName)
-                        : chordName}
-                    </Typography>
-                    <ReactChords
-                      chords={allChords[chordName]}
-                      defaultIndex={defaultIndices[chordName]}
-                      germanNotation={germanNotation}
-                      extraSettings={extraSettings}
-                      removeTitle={!showTitle}
-                      settings={settings}
-                    />
-                  </Paper>
-                </Grid>
-              );
-            })}
-          </>
+      <Grid columns={variants.length} container spacing={1}>
+        {combinations.flat().map(({ chordName, chords, defaultIndex }) => (
+          <Grid key={chordName} size={1}>
+            <Paper
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography variant="subtitle2">
+                {settings.germanNotation
+                  ? normal2germanNotation(chordName)
+                  : chordName}
+              </Typography>
+              <ReactChords
+                chords={chords}
+                defaultIndex={defaultIndex}
+                extraSettings={settings.extraSettings}
+                germanNotation={settings.germanNotation}
+                removeTitle={!settings.showTitle}
+                settings={settings.displaySettings}
+              />
+            </Paper>
+          </Grid>
         ))}
       </Grid>
-      <Button onClick={downloadAll}>Download all selected</Button>
+      <Button onClick={downloadAll}>Download all</Button>
     </Box>
   );
 }
@@ -374,11 +408,11 @@ export default App;
 
 const Setting: React.FC<{
   Key: keyof ChordSettings;
-  value?: string | number | boolean | string[];
   onChange: (
     key: keyof ChordSettings,
-    value: string | number | boolean | string[]
+    value: string[] | boolean | number | string
   ) => void;
+  value?: FretMarker[] | number[] | string[] | boolean | number | string;
 }> = ({ Key, onChange, value }) => {
   const _onChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -393,7 +427,7 @@ const Setting: React.FC<{
     [onChange, Key, value]
   );
   const _onChange2 = useCallback(
-    (e: SelectChangeEvent<string>) => {
+    (e: SelectChangeEvent) => {
       onChange(Key, e.target.value);
     },
     [onChange, Key, value]
@@ -409,21 +443,21 @@ const Setting: React.FC<{
   }, [Key, onChange, value]);
   if (Key === "style") {
     return (
-      <Select value={value as string} onChange={_onChange2}>
+      <Select onChange={_onChange2} value={value as string}>
         <MenuItem value={ChordStyle.normal}>Normal</MenuItem>
         <MenuItem value={ChordStyle.handdrawn}>Handdrawn</MenuItem>
       </Select>
     );
   } else if (Key === "orientation") {
     return (
-      <Select value={value as string} onChange={_onChange2}>
+      <Select onChange={_onChange2} value={value as string}>
         <MenuItem value={Orientation.vertical}>Vertical</MenuItem>
         <MenuItem value={Orientation.horizontal}>Horizontal</MenuItem>
       </Select>
     );
   } else if (Key === "fretLabelPosition") {
     return (
-      <Select value={value as string} onChange={_onChange2}>
+      <Select onChange={_onChange2} value={value as string}>
         <MenuItem value={FretLabelPosition.RIGHT}>Right</MenuItem>
         <MenuItem value={FretLabelPosition.LEFT}>Left</MenuItem>
       </Select>
@@ -437,14 +471,18 @@ const Setting: React.FC<{
     );
   } else if (typeof value === "string" && value.startsWith("#")) {
     return (
-      <MuiColorInput format="hex" label={Key} value={value} onChange={handleColorChange} />
+      <MuiColorInput
+        format="hex"
+        label={Key}
+        onChange={handleColorChange}
+        value={value}
+      />
     );
   }
   return (
     <TextField
-      onChange={_onChange}
-      value={value}
       label={Key}
+      onChange={_onChange}
       type={
         typeof value === "number"
           ? "number"
@@ -452,6 +490,7 @@ const Setting: React.FC<{
           ? "checkbox"
           : "text"
       }
+      value={value}
     />
   );
 };

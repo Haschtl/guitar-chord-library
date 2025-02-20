@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { Chords, loadChords } from "./chords";
+import React, { createContext, useContext, useEffect, useState } from "react";
+
+import { type Chords, loadChords } from "./chords";
 
 const chordsDatabase = createContext<Chords | null>(null);
 
@@ -11,7 +12,7 @@ export const ChordsProvider: React.FC<Props> = ({ children }) => {
   // console.log(allChordNames);
   const [allChords, setAllChords] = useState<Chords>({});
   useEffect(() => {
-    loadChords().then((chords) => setAllChords(chords));
+    loadChords().then((chords) => { setAllChords(chords); }).catch(console.error);
   }, []);
 
   return (
@@ -21,6 +22,4 @@ export const ChordsProvider: React.FC<Props> = ({ children }) => {
   );
 };
 
-export const useChords = () => {
-  return useContext(chordsDatabase);
-};
+export const useChords = () => useContext(chordsDatabase);

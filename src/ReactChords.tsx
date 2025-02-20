@@ -1,23 +1,26 @@
-import { Chord, ChordSettings } from "svguitar";
 import "./App.css";
-import ReactChord, { ChordExtraSettings } from "./ReactChordMui";
-import { useCallback, useMemo, useState } from "react";
+
+import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import {
   IconButton,
   MenuItem,
   Select,
-  SelectChangeEvent,
+  type SelectChangeEvent,
   Typography,
 } from "@mui/material";
-import { ArrowBack, ArrowForward } from "@mui/icons-material";
+import React, { useCallback, useMemo, useState } from "react";
+import type { Chord, ChordSettings } from "svguitar";
+
+import type { ChordExtraSettings } from "./ReactChord";
+import ReactChord from "./ReactChordMui";
 
 interface Props {
   chords?: Chord[];
-  germanNotation?: boolean;
   defaultIndex?: number;
-  settings?: ChordSettings;
   extraSettings?: ChordExtraSettings;
+  germanNotation?: boolean;
   removeTitle?: boolean;
+  settings?: ChordSettings;
 }
 const chordAppendix = (chords: Chord[], index: number) => {
   const position = chords[index].position ?? 1;
@@ -38,11 +41,10 @@ const chordAppendix = (chords: Chord[], index: number) => {
   }
   return appendix.slice(1);
 };
-const allAppendixes = (chords: Chord[]) => {
-  return chords
-    .map((_, i) => chordAppendix(chords, i))
-    // .filter((v, i, a) => a.indexOf(v) === i);
-};
+const allAppendixes = (chords: Chord[]) =>
+  chords.map((_, i) => chordAppendix(chords, i));
+// .filter((v, i, a) => a.indexOf(v) === i);
+const nullF = () => null;
 const EMPTY_STR = "-";
 const ReactChords: React.FC<Props> = ({
   chords = [],
@@ -67,19 +69,17 @@ const ReactChords: React.FC<Props> = ({
   }, [setSmartIndex]);
   const all = useMemo(() => allAppendixes(chords), [chords]);
   const setIndexByAppendix = useCallback(
-    (e: SelectChangeEvent<string>) => {
+    (e: SelectChangeEvent) => {
       setIndex(all.indexOf(e.target.value !== EMPTY_STR ? e.target.value : ""));
     },
     [all]
   );
   if (chords.length <= 0) {
     return (
-      <>
-        <Typography variant="h4" marginTop="50%">
-          {/* {`${index + 1}/${chords.length}`} */}
-          n.A.
-        </Typography>
-      </>
+      <Typography marginTop="50%" variant="h4">
+        {/* {`${index + 1}/${chords.length}`} */}
+        n.A.
+      </Typography>
     );
   }
   const appendix = chordAppendix(chords, index);
@@ -89,12 +89,12 @@ const ReactChords: React.FC<Props> = ({
         {`${index + 1}/${chords.length}`}
       </Typography>
       <ReactChord
-        removeTitle={removeTitle}
         chord={chords[index]}
+        extraSettings={extraSettings}
         fileAppendix={"-" + appendix + ".svg"}
         germanNotation={germanNotation}
+        removeTitle={removeTitle}
         settings={settings}
-        extraSettings={extraSettings}
       />
       <div className="button-bar">
         <IconButton onClick={setPreviousIdx}>
@@ -102,11 +102,11 @@ const ReactChords: React.FC<Props> = ({
         </IconButton>
         <Select
           // componentsProps={{ input: { style: { paddingRight: "14px !important" } } }}
-          IconComponent={() => null}
+          IconComponent={nullF}
           className="variant-select"
+          onChange={setIndexByAppendix}
           size="small"
           value={appendix !== "" ? appendix : EMPTY_STR}
-          onChange={setIndexByAppendix}
         >
           {all
             .toSorted((a, b) => a.localeCompare(b))
