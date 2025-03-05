@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import {
@@ -13,7 +14,7 @@ import {
 } from "svguitar";
 import { z } from "zod";
 
-import { type ChordExtraSettings, zChordExtraSettings } from "./ReactChord";
+import { type ChordExtraSettings, zChordExtraSettings } from "../ReactChord";
 
 export const zSettings = z.object({
   displaySettings: z.record(
@@ -71,17 +72,22 @@ export const defaultSettings: Settings = {
 
 // Context-Typen
 interface SettingsContextType {
+  notes: string[];
+  reset: () => void;
   setDisplaySetting: (
     key: keyof ChordSettings,
     value: string[] | boolean | number | string
   ) => void;
   setExtraSetting: (key: keyof ChordExtraSettings, value: boolean) => void;
+  setNotes: (notes: string[]) => void;
+  setVariants: (variants: string[]) => void;
   settings: Settings;
   toggleGermanNotation: () => void;
   toggleShowNoteFingerings: () => void;
   toggleShowNoteNames: () => void;
   toggleShowTitle: () => void;
   updateSettings: (newSettings: Partial<Settings>) => void;
+  variants: string[];
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(
@@ -94,13 +100,18 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
   const [settings, setSettings] = useState<Settings>(() => {
     const storedSettings = localStorage.getItem("app-settings");
     return storedSettings
-      ? zSettings.safeParse(JSON.parse(storedSettings)).data ?? defaultSettings
-      : defaultSettings;
+      ? zSettings.safeParse(JSON.parse(storedSettings)).data ?? {
+          ...defaultSettings,
+        }
+      : { ...defaultSettings };
   });
 
   useEffect(() => {
     localStorage.setItem("app-settings", JSON.stringify(settings));
   }, [settings]);
+  const reset = useCallback(() => {
+    setSettings({ ...defaultSettings });
+  }, []);
 
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings((prev) => ({ ...prev, ...newSettings }));
@@ -151,19 +162,75 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     }));
   }, []);
 
+  const [notes, setNotes] = useState([
+    "A",
+    // "A#",
+    "B",
+    "C",
+    // "C#",
+    "D",
+    // "D#",
+    "E",
+    "F",
+    // "F#",
+    "G",
+    // "G#",
+  ]);
+  const [variants, setVariants] = useState([
+    "",
+    "7",
+    "maj7",
+    "6",
+    "m",
+    "m7",
+    "m6",
+    "5",
+    // "7b5",
+    // "sus2",
+    // "sus4",
+    // "dim",
+    // "9",
+    // "aug",
+    // "maj9",
+    // "maj11",
+    // "add9",
+    // "dim7",
+  ]);
+  const value = useMemo(
+    () => ({
+      notes,
+      reset,
+      setDisplaySetting,
+      setExtraSetting,
+      setNotes,
+      setVariants,
+      settings,
+      toggleGermanNotation,
+      toggleShowNoteFingerings,
+      toggleShowNoteNames,
+      toggleShowTitle,
+      updateSettings,
+      variants,
+    }),
+    [
+      setDisplaySetting,
+      setExtraSetting,
+      settings,
+      toggleGermanNotation,
+      toggleShowNoteFingerings,
+      toggleShowNoteNames,
+      toggleShowTitle,
+      updateSettings,
+      variants,
+      setVariants,
+      notes,
+      setNotes,
+      reset,
+    ]
+  );
+
   return (
-    <SettingsContext.Provider
-      value={{
-        setDisplaySetting,
-        setExtraSetting,
-        settings,
-        toggleGermanNotation,
-        toggleShowNoteFingerings,
-        toggleShowNoteNames,
-        toggleShowTitle,
-        updateSettings,
-      }}
-    >
+    <SettingsContext.Provider value={value}>
       {children}
     </SettingsContext.Provider>
   );

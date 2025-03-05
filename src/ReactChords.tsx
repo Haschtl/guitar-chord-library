@@ -15,12 +15,12 @@ import type { ChordExtraSettings } from "./ReactChord";
 import ReactChord from "./ReactChordMui";
 
 interface Props {
-  chords?: Chord[];
-  defaultIndex?: number;
-  extraSettings?: ChordExtraSettings;
-  germanNotation?: boolean;
-  removeTitle?: boolean;
-  settings?: ChordSettings;
+  chords: Chord[];
+  defaultIndex: number;
+  extraSettings: ChordExtraSettings;
+  germanNotation: boolean;
+  removeTitle: boolean;
+  settings: ChordSettings;
 }
 const chordAppendix = (chords: Chord[], index: number) => {
   const position = chords[index].position ?? 1;
@@ -46,6 +46,7 @@ const allAppendixes = (chords: Chord[]) =>
 // .filter((v, i, a) => a.indexOf(v) === i);
 const nullF = () => null;
 const EMPTY_STR = "-";
+
 const ReactChords: React.FC<Props> = ({
   chords = [],
   defaultIndex = 0,

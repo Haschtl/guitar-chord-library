@@ -8,12 +8,15 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import App from "./App.tsx";
-import { SettingsProvider } from "./context.tsx";
+import { ChordsProvider } from "./context/chords.tsx";
+import { SettingsProvider } from "./context/settings.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <SettingsProvider>
-      <App />
+      <ChordsProvider>
+        <App />
+      </ChordsProvider>
     </SettingsProvider>
   </React.StrictMode>
 );

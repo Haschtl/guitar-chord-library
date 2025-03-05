@@ -31,7 +31,7 @@ export const ReactChord: React.FC<Props> = ({
 }) => {
   const id2 = useMemo(
     () => chordName2id(String(chord.title ?? "chart")) + (id ?? ""),
-    [chord.title]
+    [chord.title, id]
   );
 
   useSVGuitarChord(id2, chord, {

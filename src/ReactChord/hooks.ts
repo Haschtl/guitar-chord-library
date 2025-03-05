@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { type Chord, type ChordSettings, SVGuitarChord } from "svguitar";
 
 import { configureChordSettings } from "./settings";
@@ -14,16 +14,20 @@ export const useSVGuitarChord = (
     settings?: Partial<ChordSettings>;
   }
 ) => {
-  const [chart, setChart] = useState<SVGuitarChord>();
+  // const [chart, setChart] = useState<SVGuitarChord>();
+  const chart = useRef<SVGuitarChord>(null);
+  const ref = useRef<HTMLElement>(null);
 
   const initChart = useCallback(() => {
     const query = "#" + id;
     const s = document.querySelector(query);
     if (s && s.children.length === 0) {
-      const c = new SVGuitarChord(query);
-      setChart(c);
+      ref.current = s as HTMLElement;
+      const c = new SVGuitarChord(s as HTMLElement);
+      // setChart(c);
+      chart.current = c;
       return {
-        chart,
+        chart: c,
         cleanup: () => {
           try {
             c.clear();
@@ -31,29 +35,34 @@ export const useSVGuitarChord = (
           } catch (e) {
             console.warn(e);
           }
-          setChart(undefined);
+          chart.current = null;
+          ref.current = null;
+          // setChart(undefined);
           // s.innerHTML=""
         },
       };
     }
   }, [id]);
-  useEffect(() => initChart()?.cleanup, [initChart]);
+  useEffect(() => initChart()?.cleanup, []);
 
   useEffect(() => {
     // draw the chart
     // if (!chart) {
     //   initChart();
     // }
-    const _chart = chart ?? initChart()?.chart;
-    if (_chart)
+    const _chart = chart.current ?? initChart()?.chart;
+    if (_chart) {
       drawSvg(
         _chart,
         { ...chord, barres: chord.barres ?? [], fingers: chord.fingers ?? [] },
         options
       );
+      console.log("rerender");
+    } else {
+      console.error(`Failed to update chart ${id}`);
+    }
     // } else {
-    //   console.error(`Failed to update chart ${id}`);
-  }, [id, chart, chord, options, initChart]);
+  }, [id, chord, options, initChart]);
 };
 
 const drawSvg = (
