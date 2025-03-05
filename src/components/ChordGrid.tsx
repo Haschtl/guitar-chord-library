@@ -1,10 +1,10 @@
 import { Paper, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
-import { normal2germanNotation } from "./chords";
-import { useChordLibrary } from "./context/chords";
-import { useSettings } from "./context/settings";
-import ReactChords from "./ReactChords";
+import { normal2germanNotation } from "../chords";
+import { useChordLibrary } from "../context/chords";
+import { useSettings } from "../context/settings";
+import ReactChords from "../lib/ReactChords";
 
 const fixChordName = (name: string) => name;
 // return name.replace("#m", "m#");

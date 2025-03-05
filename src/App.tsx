@@ -8,9 +8,9 @@ import { Box, Button } from "@mui/material";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import { useCallback } from "react";
 
-import { ChordGrid } from "./ChordGrid";
+import { ChordGrid } from "./components/ChordGrid";
+import { Settings } from "./components/Settings";
 import { chordId2name, saveBlob, svgElement2blob } from "./helper";
-import { Settings } from "./Settings";
 
 function App() {
   const downloadAll = useCallback(() => {

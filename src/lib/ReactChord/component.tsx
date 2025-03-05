@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import type { ChordSettings } from "svguitar";
 
-import { chordName2id } from "../helper";
+import { chordName2id } from "../../helper";
 import { useSVGuitarChord } from "./hooks";
 import type { ChordExtraSettings, ChordPlus } from "./types";
 

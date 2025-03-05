@@ -14,7 +14,10 @@ import {
 } from "svguitar";
 import { z } from "zod";
 
-import { type ChordExtraSettings, zChordExtraSettings } from "../ReactChord";
+import {
+  type ChordExtraSettings,
+  zChordExtraSettings,
+} from "../lib/ReactChord";
 
 export const zSettings = z.object({
   displaySettings: z.record(

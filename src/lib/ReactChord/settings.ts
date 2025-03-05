@@ -8,7 +8,7 @@ import {
   Orientation,
 } from "svguitar";
 
-import { normal2germanNotation } from "../chords";
+import { normal2germanNotation } from "../../chords";
 import type { ChordExtraSettings, ChordPlus } from "./types";
 
 export const defaultSettings: ChordSettings = {

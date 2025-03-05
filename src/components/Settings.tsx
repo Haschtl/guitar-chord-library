@@ -28,8 +28,8 @@ import {
   Orientation,
 } from "svguitar";
 
-import { allNotes, useChordLibrary } from "./context/chords";
-import { useSettings } from "./context/settings";
+import { allNotes, useChordLibrary } from "../context/chords";
+import { useSettings } from "../context/settings";
 
 export function Settings() {
   const {

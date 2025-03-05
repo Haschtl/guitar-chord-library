@@ -1,5 +1,3 @@
-import "./App.css";
-
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import {
   IconButton,
@@ -12,7 +10,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import type { Chord, ChordSettings } from "svguitar";
 
 import type { ChordExtraSettings } from "./ReactChord";
-import ReactChord from "./ReactChordMui";
+import ReactChordEditable from "./ReactChordEditable";
 
 interface Props {
   chords: Chord[];
@@ -89,7 +87,7 @@ const ReactChords: React.FC<Props> = ({
       <Typography variant="caption">
         {`${index + 1}/${chords.length}`}
       </Typography>
-      <ReactChord
+      <ReactChordEditable
         chord={chords[index]}
         extraSettings={extraSettings}
         fileAppendix={"-" + appendix + ".svg"}

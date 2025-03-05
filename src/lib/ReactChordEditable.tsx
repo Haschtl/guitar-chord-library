@@ -18,8 +18,8 @@ import React, {
 } from "react";
 import type { ChordSettings } from "svguitar";
 
-import { chord2filename } from "./chords";
-import { chordName2id, saveSvg } from "./helper";
+import { chord2filename } from "../chords";
+import { chordName2id, saveSvg } from "../helper";
 import {
   type ChordExtraSettings,
   type ChordPlus,
@@ -50,7 +50,7 @@ interface Props {
   settings?: Partial<ChordSettings>;
 }
 
-const ReactChordMui: React.FC<Props> = ({
+const ReactChordEditable: React.FC<Props> = ({
   settings,
   chord,
   germanNotation,
@@ -268,4 +268,4 @@ const ReactChordMui: React.FC<Props> = ({
   );
 };
 
-export default ReactChordMui;
+export default ReactChordEditable;
