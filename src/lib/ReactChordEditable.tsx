@@ -6,6 +6,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  useColorScheme,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -28,6 +29,28 @@ import {
   ReactChord,
   useSVGuitarChord,
 } from "./ReactChord";
+
+function useSystemDarkMode(): boolean {
+  const getDarkModePreference = () =>
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+  const [isDarkMode, setIsDarkMode] = useState(getDarkModePreference());
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handleChange = () => {
+      setIsDarkMode(mediaQuery.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  return isDarkMode;
+}
 
 export const hashCode = (value: string) => {
   let chr: number | null = null;
@@ -185,6 +208,10 @@ const ReactChordEditable: React.FC<Props> = ({
     removeTitle,
     settings,
   });
+  const { mode } = useColorScheme();
+  const system = useSystemDarkMode();
+  const realMode =
+    mode === "system" || mode == null ? (system ? "dark" : "light") : mode;
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down("md"));
   // useSVGuitarChord(id2, chordState, {
@@ -193,9 +220,14 @@ const ReactChordEditable: React.FC<Props> = ({
   //   removeTitle,
   //   settings,
   // });
-  const backgroundColor = isHexColorLight(settings?.color ?? "black")
-    ? "black"
-    : "white";
+  const isBright = isHexColorLight(settings?.color ?? "black");
+  const backgroundColor = isBright
+    ? realMode === "dark"
+      ? "transparent"
+      : "#222222"
+    : realMode === "dark"
+    ? "#BBBBBB"
+    : "transparent";
 
   return (
     <>
