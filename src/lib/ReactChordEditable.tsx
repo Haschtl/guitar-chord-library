@@ -1,4 +1,5 @@
 import { Editor, type OnChange, type OnMount } from "@monaco-editor/react";
+import { Close } from "@mui/icons-material";
 import {
   Button,
   type ButtonProps,
@@ -6,6 +7,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   useColorScheme,
   useMediaQuery,
   useTheme,
@@ -268,7 +270,12 @@ const ReactChordEditable: React.FC<Props> = ({
         open={open}
         // keepMounted
       >
-        <DialogTitle>{id}</DialogTitle>
+        <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
+          <div>{id}</div>
+          <IconButton onClick={handleClose}>
+            <Close />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
           <div
             style={{
@@ -314,7 +321,7 @@ const ReactChordEditable: React.FC<Props> = ({
             <Editor
               defaultLanguage="json"
               // defaultValue={chordStateStr}
-              height="600px"
+              height={smallScreen ? "300px" : "600px"}
               key={`${id}${fileAppendix}`}
               onChange={setChordStateByString}
               onMount={handleEditorDidMount}
