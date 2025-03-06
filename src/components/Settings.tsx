@@ -36,6 +36,7 @@ import {
   Orientation,
 } from "svguitar";
 
+import { normal2germanNotation } from "../chords";
 import { allNotes, useChordLibrary } from "../context/chords";
 import { useSettings } from "../context/settings";
 import { ChordSearch } from "./ChordSearch";
@@ -87,7 +88,7 @@ export function Settings() {
               <Select multiple onChange={notesChanged} value={notes}>
                 {allNotes.map((n) => (
                   <MenuItem key={n} value={n}>
-                    {n}
+                    {settings.germanNotation ? normal2germanNotation(n) : n}
                   </MenuItem>
                 ))}
               </Select>
