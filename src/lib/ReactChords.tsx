@@ -1,5 +1,6 @@
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import {
+  type ButtonProps,
   IconButton,
   MenuItem,
   Select,
@@ -12,9 +13,9 @@ import type { Chord, ChordSettings } from "svguitar";
 import type { ChordExtraSettings } from "./ReactChord";
 import ReactChordEditable from "./ReactChordEditable";
 
-interface Props {
-  chords: Chord[];
-  defaultIndex: number;
+interface Props extends ButtonProps {
+  chords?: Chord[];
+  defaultIndex?: number;
   extraSettings: ChordExtraSettings;
   germanNotation: boolean;
   removeTitle: boolean;
@@ -52,6 +53,7 @@ const ReactChords: React.FC<Props> = ({
   settings,
   extraSettings,
   removeTitle,
+  ...props
 }) => {
   const [index, setIndex] = useState(defaultIndex);
   const setSmartIndex = useCallback(
@@ -94,6 +96,7 @@ const ReactChords: React.FC<Props> = ({
         germanNotation={germanNotation}
         removeTitle={removeTitle}
         settings={settings}
+        {...props}
       />
       <div className="button-bar">
         <IconButton onClick={setPreviousIdx}>

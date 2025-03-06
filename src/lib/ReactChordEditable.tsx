@@ -1,6 +1,7 @@
 import { Editor, type OnChange, type OnMount } from "@monaco-editor/react";
 import {
   Button,
+  type ButtonProps,
   Dialog,
   DialogActions,
   DialogContent,
@@ -41,7 +42,21 @@ export const hashCode = (value: string) => {
   return hash.toString(36);
 };
 
-interface Props {
+function isHexColorLight(hex: string): boolean {
+  // HEX in RGB umwandeln
+  const hexValue = hex.replace("#", "");
+  const r = parseInt(hexValue.substring(0, 2), 16);
+  const g = parseInt(hexValue.substring(2, 4), 16);
+  const b = parseInt(hexValue.substring(4, 6), 16);
+
+  // Helligkeit berechnen (relative luminance nach W3C)
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+
+  // Schwellenwert bei ca. 128 (Mitte von 0-255)
+  return luminance > 128;
+}
+
+interface Props extends ButtonProps {
   chord: ChordPlus;
   extraSettings?: ChordExtraSettings;
   fileAppendix?: string;
@@ -57,6 +72,7 @@ const ReactChordEditable: React.FC<Props> = ({
   removeTitle = true,
   fileAppendix = "",
   extraSettings,
+  ...props
 }) => {
   const [edited, setEdited] = useState(false);
   const [open, setOpen] = useState(false);
@@ -176,6 +192,9 @@ const ReactChordEditable: React.FC<Props> = ({
   //   removeTitle,
   //   settings,
   // });
+  const backgroundColor = isHexColorLight(settings?.color ?? "black")
+    ? "black"
+    : "white";
 
   return (
     <>
@@ -186,11 +205,16 @@ const ReactChordEditable: React.FC<Props> = ({
         // style={{ cursor: "pointer" }}
         // type="button"
         // ref={ref}
+        {...props}
       >
         <div
           className={`svg-wrapper ${id}`}
           id={id}
-          style={{ textTransform: "none", width: "100%" }}
+          style={{
+            backgroundColor,
+            textTransform: "none",
+            width: "100%",
+          }}
         />
         {/* <ReactChord
           chord={chordState}
@@ -229,6 +253,7 @@ const ReactChordEditable: React.FC<Props> = ({
               removeTitle={removeTitle}
               settings={settings}
               style={{
+                backgroundColor,
                 height: "100%",
                 minHeight: "100px",
                 minWidth: "200px",

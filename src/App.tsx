@@ -4,15 +4,24 @@
 
 import "./App.css";
 
-import { Box, Button } from "@mui/material";
+import { Box, Button, CssBaseline } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import { useCallback } from "react";
 
 import { ChordGrid } from "./components/ChordGrid";
 import { Settings } from "./components/Settings";
+import { useChordLibrary } from "./context/chords";
 import { chordId2name, saveBlob, svgElement2blob } from "./helper";
 
+const theme = createTheme({
+  colorSchemes: {
+    dark: true,
+  },
+});
+
 function App() {
+  const { loading } = useChordLibrary();
   const downloadAll = useCallback(() => {
     // const chords=Object.values(allChords).flat()
     const divs = document.querySelectorAll(".svg-wrapper");
@@ -61,12 +70,33 @@ function App() {
   }, []);
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Settings />
-      <br />
-      <ChordGrid />
-      <Button onClick={downloadAll}>Download all</Button>
-    </Box>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <main>
+        <Box sx={{ flexGrow: 1 }}>
+          {loading && (
+            <div
+              style={{
+                alignItems: "center",
+                backdropFilter: "blur(10px)",
+                background: "#44444444",
+                display: "flex",
+                inset: 0,
+                justifyContent: "center",
+                position: "absolute",
+                zIndex: 61436,
+              }}
+            >
+              Loading library...
+            </div>
+          )}
+          <Settings />
+          <br />
+          <ChordGrid />
+          <Button onClick={downloadAll}>Download all</Button>
+        </Box>
+      </main>
+    </ThemeProvider>
   );
 }
 

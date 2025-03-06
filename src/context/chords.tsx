@@ -12,6 +12,7 @@ import { type Chords, loadChords } from "../chords";
 interface ChordsContextType {
   chords: Chords;
   defaultIndices: Record<string, number>;
+  loading: boolean;
   variants: string[];
 }
 
@@ -51,23 +52,29 @@ export const ChordsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [chords, setChords] = useState<Chords>({});
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
+    setLoading(true);
     loadChords()
       .then((chords) => {
         setChords(chords);
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const value = useMemo(
     () => ({
       chords,
       defaultIndices,
+      loading,
       variants: Object.keys(chords)
         .filter((c) => c.startsWith(allNotes[1]))
         .map((c) => c.replace(allNotes[1], "")),
     }),
-    [chords]
+    [chords, loading]
   );
   return (
     <ChordsContext.Provider value={value}>{children}</ChordsContext.Provider>

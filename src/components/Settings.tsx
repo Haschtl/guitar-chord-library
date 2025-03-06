@@ -1,8 +1,11 @@
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+/* eslint-disable react/jsx-no-bind */
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
+  Close,
+  DarkMode,
+  DisplaySettings,
+  LightMode,
+} from "@mui/icons-material";
+import {
   Autocomplete,
   Box,
   Button,
@@ -10,16 +13,21 @@ import {
   CardContent,
   CardHeader,
   Checkbox,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   FormControlLabel,
   FormGroup,
+  IconButton,
   MenuItem,
   Select,
   type SelectChangeEvent,
   TextField,
+  useColorScheme,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { MuiColorInput } from "mui-color-input";
-import React, { type ChangeEvent, useCallback } from "react";
+import React, { type ChangeEvent, useCallback, useState } from "react";
 import {
   type ChordSettings,
   ChordStyle,
@@ -30,6 +38,7 @@ import {
 
 import { allNotes, useChordLibrary } from "../context/chords";
 import { useSettings } from "../context/settings";
+import { ChordSearch } from "./ChordSearch";
 
 export function Settings() {
   const {
@@ -46,6 +55,14 @@ export function Settings() {
     reset,
   } = useSettings();
   const { variants: allVariants } = useChordLibrary();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { mode, setMode } = useColorScheme();
+  const closeDialog = useCallback(() => {
+    setDialogOpen(false);
+  }, []);
+  const openDialog = useCallback(() => {
+    setDialogOpen(true);
+  }, []);
 
   const notesChanged = useCallback(
     (e: SelectChangeEvent<string[]>) => {
@@ -78,7 +95,6 @@ export function Settings() {
                 multiple
                 onChange={variantsChanged}
                 options={allVariants}
-                // eslint-disable-next-line react/jsx-no-bind
                 renderInput={(params) => (
                   <>
                     <div
@@ -114,8 +130,29 @@ export function Settings() {
             </FormGroup>
           </CardContent>
         </Card>
-        <Card>
+        <Card sx={{ position: "relative" }}>
           <CardHeader title={"Display"} />
+          <IconButton
+            onClick={() => {
+              if (mode === "dark") {
+                setMode("light");
+              } else if (mode === "light") {
+                setMode("system");
+              } else {
+                setMode("dark");
+              }
+            }}
+            sx={{ position: "absolute", right: "5px", top: "5px" }}
+            title="Change theme"
+          >
+            {mode === "dark" ? (
+              <DarkMode />
+            ) : mode === "light" ? (
+              <LightMode />
+            ) : (
+              <DisplaySettings />
+            )}
+          </IconButton>
           <CardContent>
             <FormGroup>
               <FormControlLabel
@@ -154,45 +191,41 @@ export function Settings() {
                 }
                 label="Show title"
               />
+              <Button onClick={openDialog}>Appearance</Button>
               <Button onClick={reset}>Reset</Button>
             </FormGroup>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader title={"Appearance"} />
-          <CardContent>
-            <Accordion>
-              <AccordionSummary
-                aria-controls="panel1-content"
-                expandIcon={<ExpandMoreIcon />}
-                id="panel1-header"
-              >
-                Expand
-              </AccordionSummary>
-              <AccordionDetails>
-                <Box
-                  autoComplete="off"
-                  component="form"
-                  noValidate
-                  sx={{
-                    "& .MuiTextField-root": { m: 1, width: "25ch" },
-                  }}
-                >
-                  {Object.keys(settings.displaySettings).map((key) => (
-                    <Setting
-                      Key={key as keyof ChordSettings}
-                      key={key}
-                      onChange={setDisplaySetting}
-                      value={
-                        settings.displaySettings[key as keyof ChordSettings]
-                      }
-                    />
-                  ))}
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          </CardContent>
-        </Card>
+        <ChordSearch />
+        <Dialog onClose={closeDialog} open={dialogOpen}>
+          <DialogTitle
+            sx={{ display: "flex", justifyContent: "space-between" }}
+          >
+            <div>Appearance</div>
+            <IconButton onClick={closeDialog}>
+              <Close />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent>
+            <Box
+              autoComplete="off"
+              component="form"
+              noValidate
+              sx={{
+                "& .MuiTextField-root": { m: 1, width: "25ch" },
+              }}
+            >
+              {Object.keys(settings.displaySettings).map((key) => (
+                <Setting
+                  Key={key as keyof ChordSettings}
+                  key={key}
+                  onChange={setDisplaySetting}
+                  value={settings.displaySettings[key as keyof ChordSettings]}
+                />
+              ))}
+            </Box>
+          </DialogContent>
+        </Dialog>
       </Grid>
     </Box>
   );
