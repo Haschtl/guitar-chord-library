@@ -36,7 +36,7 @@ export function ChordSearch() {
       if (typeof value === "string") {
         const norm = normalizeChordname(value);
         setFound({
-          chords: allChords[norm].map((c) => ({ ...c, title: value })) ?? [],
+          chords: allChords[norm]?.map((c) => ({ ...c, title: value })) ?? [],
           index: defaultIndices[norm],
         });
       }

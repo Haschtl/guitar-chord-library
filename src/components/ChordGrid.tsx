@@ -19,7 +19,7 @@ export function ChordGrid() {
       const norm = normalizeChordname(chordName);
       return {
         chordName,
-        chords: allChords[norm].map((c) => ({ ...c, title: chordName })) ?? [],
+        chords: allChords[norm]?.map((c) => ({ ...c, title: chordName })) ?? [],
         defaultIndex: defaultIndices[norm],
         ext,
         note,
