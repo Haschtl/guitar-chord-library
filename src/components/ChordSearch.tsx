@@ -15,7 +15,7 @@ import ReactChords from "../lib/ReactChords";
 
 const filterOptions = createFilterOptions({
   limit: 100,
-  matchFrom: "start",
+  matchFrom: "any",
 });
 const fixChordName = (name: string) => name;
 // return name.replace("#m", "m#");
@@ -39,8 +39,8 @@ export function ChordSearch() {
 
   const chordNames = useMemo(
     () =>
-      allNotes
-        .map((note) => variants.map((ext) => fixChordName(note + ext)))
+      variants
+        .map((ext) => allNotes.map((note) => fixChordName(note + ext)))
         .flat(),
     [variants]
   );
