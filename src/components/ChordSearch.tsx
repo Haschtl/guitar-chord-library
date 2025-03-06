@@ -7,6 +7,7 @@ import {
   TextField,
 } from "@mui/material";
 import { type SyntheticEvent, useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Chord } from "svguitar";
 
 import { normal2germanNotation } from "../chords";
@@ -51,9 +52,10 @@ export function ChordSearch() {
         .flat(),
     [variants, settings.germanNotation]
   );
+  const { t } = useTranslation();
   return (
     <Card sx={{ minWidth: "200px" }}>
-      <CardHeader title={"Search"} />
+      <CardHeader title={t("Search")} />
       <CardContent
         sx={{
           display: "flex",
@@ -85,9 +87,9 @@ export function ChordSearch() {
                   ...params.InputProps,
                   // startAdornment: undefined,
                 }}
-                label="Search chord"
+                label={t("Search chord")}
                 multiline
-                placeholder="Search chord..."
+                placeholder={t("Search chord...")}
                 variant="standard"
               />
             </>

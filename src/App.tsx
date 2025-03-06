@@ -7,6 +7,7 @@ import { Box, Button, CssBaseline } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import { useCallback, useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 
 import { ChordGrid } from "./components/ChordGrid";
 import { Settings } from "./components/Settings";
@@ -97,13 +98,15 @@ function App() {
                 zIndex: 61436,
               }}
             >
-              Loading library...
+              <Trans>Loading library...</Trans>
             </div>
           )}
           <Settings />
           <br />
           <ChordGrid />
-          <Button onClick={downloadAll}>Download all</Button>
+          <Button onClick={downloadAll}>
+            <Trans>Download all</Trans>
+          </Button>
         </Box>
       </main>
     </ThemeProvider>

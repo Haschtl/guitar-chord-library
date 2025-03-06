@@ -18,6 +18,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { Trans } from "react-i18next";
 import type { ChordSettings } from "svguitar";
 
 import { chord2filename } from "../chords";
@@ -326,9 +327,11 @@ const ReactChordEditable: React.FC<Props> = ({
           </div>
           <DialogActions>
             <Button disabled={!edited} onClick={reset}>
-              Reset
+              <Trans>Reset</Trans>
             </Button>
-            <Button onClick={download}>Download</Button>
+            <Button onClick={download}>
+              <Trans>Download</Trans>
+            </Button>
           </DialogActions>
         </DialogContent>
       </Dialog>

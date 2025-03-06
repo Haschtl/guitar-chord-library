@@ -28,6 +28,7 @@ import {
 import Grid from "@mui/material/Grid2";
 import { MuiColorInput } from "mui-color-input";
 import React, { type ChangeEvent, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   type ChordSettings,
   ChordStyle,
@@ -77,12 +78,13 @@ export function Settings() {
     },
     [setVariants]
   );
+  const { t } = useTranslation();
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Grid container gap={2} spacing={1}>
         <Card>
-          <CardHeader title={"Chord-Selection"} />
+          <CardHeader title={t("Chord-Selection")} />
           <CardContent>
             <FormGroup>
               <Select multiple onChange={notesChanged} value={notes}>
@@ -113,9 +115,9 @@ export function Settings() {
                         ...params.InputProps,
                         startAdornment: undefined,
                       }}
-                      label="Chord-variants"
+                      label={t("Chord-variants")}
                       multiline
-                      placeholder="Search variants..."
+                      placeholder={t("Search variants...")}
                       variant="standard"
                     />
                   </>
@@ -144,7 +146,7 @@ export function Settings() {
               }
             }}
             sx={{ position: "absolute", right: "5px", top: "5px" }}
-            title="Change theme"
+            title={t("Change theme")}
           >
             {mode === "dark" ? (
               <DarkMode />
@@ -163,7 +165,7 @@ export function Settings() {
                     onClick={toggleShowNoteFingerings}
                   />
                 }
-                label="Show fingering"
+                label={t("Show fingering")}
               />
               <FormControlLabel
                 control={
@@ -172,7 +174,7 @@ export function Settings() {
                     onClick={toggleShowNoteNames}
                   />
                 }
-                label="Show notes"
+                label={t("Show notes")}
               />
               <FormControlLabel
                 control={
@@ -181,7 +183,7 @@ export function Settings() {
                     onClick={toggleGermanNotation}
                   />
                 }
-                label="German notation (B->H)"
+                label={t("German notation (B->H)")}
               />
               <FormControlLabel
                 control={
@@ -190,10 +192,10 @@ export function Settings() {
                     onClick={toggleShowTitle}
                   />
                 }
-                label="Show title"
+                label={t("Show title")}
               />
-              <Button onClick={openDialog}>Appearance</Button>
-              <Button onClick={reset}>Reset</Button>
+              <Button onClick={openDialog}>{t("Appearance")}</Button>
+              <Button onClick={reset}>{t("Reset")}</Button>
             </FormGroup>
           </CardContent>
         </Card>
@@ -202,7 +204,7 @@ export function Settings() {
           <DialogTitle
             sx={{ display: "flex", justifyContent: "space-between" }}
           >
-            <div>Appearance</div>
+            <div>{t("Appearance")}</div>
             <IconButton onClick={closeDialog}>
               <Close />
             </IconButton>
@@ -267,25 +269,26 @@ const Setting: React.FC<{
   const toggleValue = useCallback(() => {
     onChange(Key, !value);
   }, [Key, onChange, value]);
+  const { t } = useTranslation();
   if (Key === "style") {
     return (
       <Select onChange={_onChange2} value={value as string}>
-        <MenuItem value={ChordStyle.normal}>Normal</MenuItem>
-        <MenuItem value={ChordStyle.handdrawn}>Handdrawn</MenuItem>
+        <MenuItem value={ChordStyle.normal}>{t("Normal")}</MenuItem>
+        <MenuItem value={ChordStyle.handdrawn}>{t("Handdrawn")}</MenuItem>
       </Select>
     );
   } else if (Key === "orientation") {
     return (
       <Select onChange={_onChange2} value={value as string}>
-        <MenuItem value={Orientation.vertical}>Vertical</MenuItem>
-        <MenuItem value={Orientation.horizontal}>Horizontal</MenuItem>
+        <MenuItem value={Orientation.vertical}>{t("Vertical")}</MenuItem>
+        <MenuItem value={Orientation.horizontal}>{t("Horizontal")}</MenuItem>
       </Select>
     );
   } else if (Key === "fretLabelPosition") {
     return (
       <Select onChange={_onChange2} value={value as string}>
-        <MenuItem value={FretLabelPosition.RIGHT}>Right</MenuItem>
-        <MenuItem value={FretLabelPosition.LEFT}>Left</MenuItem>
+        <MenuItem value={FretLabelPosition.RIGHT}>{t("Right")}</MenuItem>
+        <MenuItem value={FretLabelPosition.LEFT}>{t("Left")}</MenuItem>
       </Select>
     );
   } else if (typeof value === "boolean") {
