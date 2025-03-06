@@ -17,6 +17,7 @@ interface Props extends ButtonProps {
   chords?: Chord[];
   defaultIndex?: number;
   extraSettings: ChordExtraSettings;
+  fallback?: React.ReactNode;
   germanNotation: boolean;
   removeTitle: boolean;
   settings: ChordSettings;
@@ -53,6 +54,7 @@ const ReactChords: React.FC<Props> = ({
   settings,
   extraSettings,
   removeTitle,
+  fallback,
   ...props
 }) => {
   const [index, setIndex] = useState(defaultIndex);
@@ -79,7 +81,7 @@ const ReactChords: React.FC<Props> = ({
     return (
       <Typography marginTop="50%" variant="h4">
         {/* {`${index + 1}/${chords.length}`} */}
-        n.A.
+        {fallback ?? "n.A."}
       </Typography>
     );
   }

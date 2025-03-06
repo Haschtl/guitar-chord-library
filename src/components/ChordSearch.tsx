@@ -91,6 +91,7 @@ export function ChordSearch() {
           chords={found?.chords}
           defaultIndex={found?.index}
           extraSettings={settings.extraSettings}
+          fallback={<div />}
           germanNotation={settings.germanNotation}
           id="single-chord"
           removeTitle={!settings.showTitle}

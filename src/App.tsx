@@ -25,9 +25,11 @@ function App() {
   useEffect(() => {
     if (loading) {
       setLoadingDelayed(true);
+      document.body.style.overflow = "hidden";
     } else {
       setTimeout(() => {
         setLoadingDelayed(false);
+        document.body.style.overflow = "inherit";
       }, 1000);
     }
   }, [loading]);
@@ -52,7 +54,6 @@ function App() {
         groupIdx = 0;
       }
       const filename = group + "/" + groupIdx + "-" + chordname + ".svg";
-      console.log(svg, filename);
       return await blob.text().then((content) => ({ blob, content, filename }));
     });
     const zipFileWriter = new BlobWriter();
@@ -90,7 +91,7 @@ function App() {
                 backdropFilter: "blur(10px)",
                 background: "#44444444",
                 display: "flex",
-                inset: 0,
+                inset: "-1000px",
                 justifyContent: "center",
                 position: "absolute",
                 zIndex: 61436,

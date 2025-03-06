@@ -57,7 +57,6 @@ export const useSVGuitarChord = (
         { ...chord, barres: chord.barres ?? [], fingers: chord.fingers ?? [] },
         options
       );
-      console.log("rerender");
     } else {
       console.error(`Failed to update chart ${id}`);
     }

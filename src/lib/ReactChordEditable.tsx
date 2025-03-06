@@ -151,7 +151,8 @@ const ReactChordEditable: React.FC<Props> = ({
               "-" +
               hashCode(JSON.stringify(chordState)) +
               ".svg",
-        germanNotation
+        false
+        // germanNotation
       )
     );
   }, [chordState, edited, fileAppendix, germanNotation]);
@@ -238,28 +239,38 @@ const ReactChordEditable: React.FC<Props> = ({
         <DialogContent>
           <div
             style={{
-              alignItems: "center",
+              alignItems: "stretch",
               display: "flex",
               flexDirection: smallScreen ? "column" : "row",
             }}
           >
-            <ReactChord
-              chord={chordState}
-              extraSettings={extraSettings}
-              fileAppendix={fileAppendix}
-              germanNotation={germanNotation}
-              id={"-modal"}
-              ref={ref}
-              removeTitle={removeTitle}
-              settings={settings}
+            <div
               style={{
                 backgroundColor,
-                height: "100%",
-                minHeight: "100px",
-                minWidth: "200px",
-                width: "100%",
+                display: "flex",
+                justifyContent: "center",
               }}
-            />
+            >
+              <ReactChord
+                chord={chordState}
+                extraSettings={extraSettings}
+                fileAppendix={fileAppendix}
+                germanNotation={germanNotation}
+                id={"-modal"}
+                ref={ref}
+                removeTitle={removeTitle}
+                settings={settings}
+                style={{
+                  alignItems: "center",
+                  backgroundColor,
+                  display: "flex",
+                  // height: "100%",
+                  minHeight: "100px",
+                  minWidth: "200px",
+                  width: "100%",
+                }}
+              />
+            </div>
             {/* <div
             className={`svg-wrapper ${id}${fileAppendix}`}
             id={id2}

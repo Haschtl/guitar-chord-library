@@ -280,7 +280,9 @@ export const configureChord = (
     title:
       options.removeTitle === true || !chord.title
         ? undefined
-        : normal2germanNotation(chord.title),
+        : options.germanNotation
+        ? normal2germanNotation(chord.title)
+        : chord.title,
     tuning: extraSettings.showNoteNames ? chord.tuning : undefined,
   };
 };

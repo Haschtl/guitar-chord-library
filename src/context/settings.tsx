@@ -168,7 +168,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
   const [notes, setNotes] = useState([
     "A",
     // "A#",
-    // "B",
+    "B",
     "C",
     // "C#",
     "D",
