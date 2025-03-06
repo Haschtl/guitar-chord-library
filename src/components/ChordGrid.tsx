@@ -4,6 +4,7 @@ import Grid from "@mui/material/Grid2";
 import { normal2germanNotation } from "../chords";
 import { useChordLibrary } from "../context/chords";
 import { useSettings } from "../context/settings";
+import { normalizeChordname } from "../helper";
 import ReactChords from "../lib/ReactChords";
 
 const fixChordName = (name: string) => name;
@@ -15,10 +16,11 @@ export function ChordGrid() {
   const combinations = notes.map((note) =>
     variants.map((ext) => {
       const chordName = fixChordName(note + ext);
+      const norm = normalizeChordname(chordName);
       return {
         chordName,
-        chords: allChords[chordName],
-        defaultIndex: defaultIndices[chordName],
+        chords: allChords[norm],
+        defaultIndex: defaultIndices[norm],
         ext,
         note,
       };

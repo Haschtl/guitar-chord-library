@@ -17,16 +17,21 @@ interface ChordsContextType {
 }
 
 export const allNotes = [
+  "Ab",
   "A",
   "A#",
+  "Bb",
   "B",
   "C",
   "C#",
+  "Db",
   "D",
   "D#",
+  "Eb",
   "E",
   "F",
   "F#",
+  "Gb",
   "G",
   "G#",
 ] as const;

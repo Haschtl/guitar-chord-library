@@ -3,6 +3,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  createFilterOptions,
   TextField,
 } from "@mui/material";
 import { type SyntheticEvent, useCallback, useMemo, useState } from "react";
@@ -12,6 +13,10 @@ import { allNotes, useChordLibrary } from "../context/chords";
 import { useSettings } from "../context/settings";
 import ReactChords from "../lib/ReactChords";
 
+const filterOptions = createFilterOptions({
+  limit: 100,
+  matchFrom: "start",
+});
 const fixChordName = (name: string) => name;
 // return name.replace("#m", "m#");
 export function ChordSearch() {
@@ -51,6 +56,8 @@ export function ChordSearch() {
         }}
       >
         <Autocomplete
+          filterOptions={filterOptions}
+          // @ts-expect-error wrong typed
           onChange={chordChanged}
           options={chordNames}
           // eslint-disable-next-line react/jsx-no-bind

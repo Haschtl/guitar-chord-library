@@ -1,5 +1,14 @@
-export const chordName2id = (name: string) => name.replace("#", "is").replace("#", "is").replace("/", "_");
-export const chordId2name = (name: string) => name.replace("is", "#").replace("is", "#").replace("_", "/");
+export const chordName2id = (name: string) =>
+  name.replaceAll("#", "is").replaceAll("/", "_");
+export const chordId2name = (name: string) =>
+  name.replaceAll("is", "#").replaceAll("_", "/");
+export const normalizeChordname = (name: string) =>
+  name
+    .replaceAll("Ab", "G#")
+    .replaceAll("Bb", "A#")
+    .replaceAll("Db", "C#")
+    .replaceAll("Eb", "D#")
+    .replaceAll("Gb", "F#");
 
 export function svgElement2blob(svgEl: SVGSVGElement) {
   svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");

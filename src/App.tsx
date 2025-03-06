@@ -1,13 +1,12 @@
 // fiix german notation
 // fix german-notation file-output
-// add Ab,etc variants
 
 import "./App.css";
 
 import { Box, Button, CssBaseline } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { ChordGrid } from "./components/ChordGrid";
 import { Settings } from "./components/Settings";
@@ -22,6 +21,16 @@ const theme = createTheme({
 
 function App() {
   const { loading } = useChordLibrary();
+  const [loadingDelayed, setLoadingDelayed] = useState(loading);
+  useEffect(() => {
+    if (loading) {
+      setLoadingDelayed(true);
+    } else {
+      setTimeout(() => {
+        setLoadingDelayed(false);
+      }, 1000);
+    }
+  }, [loading]);
   const downloadAll = useCallback(() => {
     // const chords=Object.values(allChords).flat()
     const divs = document.querySelectorAll(".svg-wrapper");
@@ -74,7 +83,7 @@ function App() {
       <CssBaseline />
       <main>
         <Box sx={{ flexGrow: 1 }}>
-          {loading && (
+          {loadingDelayed && (
             <div
               style={{
                 alignItems: "center",
