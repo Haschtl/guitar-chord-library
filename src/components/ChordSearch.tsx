@@ -9,6 +9,7 @@ import {
 import { type SyntheticEvent, useCallback, useMemo, useState } from "react";
 import type { Chord } from "svguitar";
 
+import { normal2germanNotation } from "../chords";
 import { allNotes, useChordLibrary } from "../context/chords";
 import { useSettings } from "../context/settings";
 import ReactChords from "../lib/ReactChords";
@@ -40,9 +41,15 @@ export function ChordSearch() {
   const chordNames = useMemo(
     () =>
       variants
-        .map((ext) => allNotes.map((note) => fixChordName(note + ext)))
+        .map((ext) =>
+          allNotes.map((note) =>
+            settings.germanNotation
+              ? normal2germanNotation(fixChordName(note + ext))
+              : fixChordName(note + ext)
+          )
+        )
         .flat(),
-    [variants]
+    [variants, settings.germanNotation]
   );
   return (
     <Card sx={{ minWidth: "200px" }}>
