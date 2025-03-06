@@ -134,7 +134,7 @@ export function Settings() {
           </CardContent>
         </Card>
         <Card sx={{ position: "relative" }}>
-          <CardHeader title={"Display"} />
+          <CardHeader title={t("Display")} />
           <IconButton
             onClick={() => {
               if (mode === "dark") {
