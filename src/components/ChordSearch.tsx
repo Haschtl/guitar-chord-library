@@ -13,6 +13,7 @@ import type { Chord } from "svguitar";
 import { normal2germanNotation } from "../chords";
 import { allNotes, useChordLibrary } from "../context/chords";
 import { useSettings } from "../context/settings";
+import { normalizeChordname } from "../helper";
 import ReactChords from "../lib/ReactChords";
 
 const filterOptions = createFilterOptions({
@@ -33,7 +34,11 @@ export function ChordSearch() {
     (_: SyntheticEvent, value: string[] | string | null) => {
       // setValue(value);
       if (typeof value === "string") {
-        setFound({ chords: allChords[value], index: defaultIndices[value] });
+        const norm = normalizeChordname(value);
+        setFound({
+          chords: allChords[norm].map((c) => ({ ...c, title: value })) ?? [],
+          index: defaultIndices[norm],
+        });
       }
     },
     [allChords, defaultIndices]
