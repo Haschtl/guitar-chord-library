@@ -55,6 +55,7 @@ export function ChordSearch() {
           )
         )
         .flat(),
+    // .sort((a, b) => (a.length > b.length ? 1 : -1)),
     [variants, settings.germanNotation]
   );
   const { t } = useTranslation();

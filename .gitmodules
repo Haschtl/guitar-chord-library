@@ -1,0 +1,3 @@
+[submodule "src/lib/strum-pattern"]
+	path = src/lib/strum-pattern
+	url = git@github.com:Haschtl/svg-guitar-strum-pattern.git

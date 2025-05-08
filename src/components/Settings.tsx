@@ -25,7 +25,7 @@ import {
   TextField,
   useColorScheme,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { MuiColorInput } from "mui-color-input";
 import React, { type ChangeEvent, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -234,14 +234,15 @@ export function Settings() {
   );
 }
 
-const Setting: React.FC<{
-  Key: keyof ChordSettings;
-  onChange: (
-    key: keyof ChordSettings,
-    value: string[] | boolean | number | string
-  ) => void;
+export function Setting<Key extends string>({
+  Key,
+  onChange,
+  value,
+}: {
+  Key: Key;
+  onChange: (key: Key, value: string[] | boolean | number | string) => void;
   value?: FretMarker[] | number[] | string[] | boolean | number | string;
-}> = ({ Key, onChange, value }) => {
+}) {
   const _onChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       if (typeof value === "number") {
@@ -322,4 +323,4 @@ const Setting: React.FC<{
       value={value}
     />
   );
-};
+}

@@ -56,3 +56,12 @@
   padding-left: 4px !important;
   padding-right: 4px !important;
 }
+
+.fretboard-component{
+  figure{
+    margin-block-start: 0em;
+    margin-block-end: 0em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+  }
+}

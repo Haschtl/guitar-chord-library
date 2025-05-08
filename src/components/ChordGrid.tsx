@@ -1,5 +1,5 @@
 import { Paper, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 
 import { normal2germanNotation } from "../chords";
 import { useChordLibrary } from "../context/chords";

@@ -14,6 +14,7 @@ import App from "./App.tsx";
 import { ChordsProvider } from "./context/chords.tsx";
 import { SettingsProvider } from "./context/settings.tsx";
 import de from "./locales/de.json";
+import { BrowserRouter } from "react-router";
 i18n
   .use(initReactI18next) // passes i18n down to react-i18next
   .use(I18nextBrowserLanguageDetector)
@@ -43,7 +44,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <SettingsProvider>
       <ChordsProvider>
-        <App />
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
+          <App />
+        </BrowserRouter>
       </ChordsProvider>
     </SettingsProvider>
   </React.StrictMode>

@@ -24,7 +24,12 @@ import { Trans } from "react-i18next";
 import type { ChordSettings } from "svguitar";
 
 import { chord2filename } from "../chords";
-import { chordName2id, saveSvg } from "../helper";
+import {
+  chordName2id,
+  isHexColorLight,
+  saveSvg,
+  useRealColorScheme,
+} from "../helper";
 import {
   type ChordExtraSettings,
   type ChordPlus,
@@ -32,28 +37,6 @@ import {
   ReactChord,
   useSVGuitarChord,
 } from "./ReactChord";
-
-function useSystemDarkMode(): boolean {
-  const getDarkModePreference = () =>
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-  const [isDarkMode, setIsDarkMode] = useState(getDarkModePreference());
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    const handleChange = () => {
-      setIsDarkMode(mediaQuery.matches);
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => {
-      mediaQuery.removeEventListener("change", handleChange);
-    };
-  }, []);
-
-  return isDarkMode;
-}
 
 export const hashCode = (value: string) => {
   let chr: number | null = null;
@@ -67,20 +50,6 @@ export const hashCode = (value: string) => {
   }
   return hash.toString(36);
 };
-
-function isHexColorLight(hex: string): boolean {
-  // HEX in RGB umwandeln
-  const hexValue = hex.replace("#", "");
-  const r = parseInt(hexValue.substring(0, 2), 16);
-  const g = parseInt(hexValue.substring(2, 4), 16);
-  const b = parseInt(hexValue.substring(4, 6), 16);
-
-  // Helligkeit berechnen (relative luminance nach W3C)
-  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-
-  // Schwellenwert bei ca. 128 (Mitte von 0-255)
-  return luminance > 128;
-}
 
 interface Props extends ButtonProps {
   chord: ChordPlus;
@@ -211,10 +180,6 @@ const ReactChordEditable: React.FC<Props> = ({
     removeTitle,
     settings,
   });
-  const { mode } = useColorScheme();
-  const system = useSystemDarkMode();
-  const realMode =
-    mode === "system" || mode == null ? (system ? "dark" : "light") : mode;
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down("md"));
   // useSVGuitarChord(id2, chordState, {
@@ -224,11 +189,12 @@ const ReactChordEditable: React.FC<Props> = ({
   //   settings,
   // });
   const isBright = isHexColorLight(settings?.color ?? "black");
+  const mode = useRealColorScheme();
   const backgroundColor = isBright
-    ? realMode === "dark"
+    ? mode === "dark"
       ? "transparent"
       : "#222222"
-    : realMode === "dark"
+    : mode === "dark"
     ? "#BBBBBB"
     : "transparent";
 
@@ -248,6 +214,7 @@ const ReactChordEditable: React.FC<Props> = ({
           id={id}
           style={{
             backgroundColor,
+            borderRadius: "4px",
             textTransform: "none",
             width: "100%",
           }}
@@ -287,6 +254,7 @@ const ReactChordEditable: React.FC<Props> = ({
             <div
               style={{
                 backgroundColor,
+                borderRadius: "4px",
                 display: "flex",
                 justifyContent: "center",
               }}
@@ -303,6 +271,7 @@ const ReactChordEditable: React.FC<Props> = ({
                 style={{
                   alignItems: "center",
                   backgroundColor,
+                  borderRadius: "4px",
                   display: "flex",
                   // height: "100%",
                   minHeight: "100px",

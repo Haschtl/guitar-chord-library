@@ -7,6 +7,8 @@ import love from "eslint-config-love";
 import eslintConfigPrettier from "eslint-config-prettier";
 import react from "eslint-plugin-react";
 // import reactHooks from "eslint-plugin-react-hooks";
+import tseslint from "typescript-eslint";
+
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import globals from "globals";
 import tsParser from "@typescript-eslint/parser";
@@ -25,7 +27,8 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
-export default [
+export default tseslint.config(
+  tseslint.configs.recommended,
   js.configs.recommended,
   //   jsdoc.configs["flat/recommended"],
   {
@@ -296,5 +299,5 @@ export default [
       "no-console": "off",
       "max-lines": "off",
     },
-  },
-];
+  }
+);

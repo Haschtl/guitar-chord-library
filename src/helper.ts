@@ -1,3 +1,7 @@
+import { useColorScheme } from "@mui/material";
+import { useState } from "react";
+import { useEffect } from "react";
+
 export const chordName2id = (name: string) =>
   name.replaceAll("#", "is").replaceAll("/", "_");
 export const chordId2name = (name: string) =>
@@ -30,4 +34,47 @@ export function saveBlob(blob: Blob, name: string) {
   document.body.appendChild(downloadLink);
   downloadLink.click();
   document.body.removeChild(downloadLink);
+}
+function useSystemDarkMode(): boolean {
+  const getDarkModePreference = () =>
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+  const [isDarkMode, setIsDarkMode] = useState(getDarkModePreference());
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handleChange = () => {
+      setIsDarkMode(mediaQuery.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  return isDarkMode;
+}
+
+export function useRealColorScheme() {
+  const { mode } = useColorScheme();
+  const system = useSystemDarkMode();
+  const realMode =
+    mode === "system" || mode == null ? (system ? "dark" : "light") : mode;
+  return realMode;
+}
+
+export function isHexColorLight(hex: string): boolean {
+  // HEX in RGB umwandeln
+  const hexValue = hex.replace("#", "");
+  const r = parseInt(hexValue.substring(0, 2), 16);
+  const g = parseInt(hexValue.substring(2, 4), 16);
+  const b = parseInt(hexValue.substring(4, 6), 16);
+
+  // Helligkeit berechnen (relative luminance nach W3C)
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+
+  // Schwellenwert bei ca. 128 (Mitte von 0-255)
+  return luminance > 128;
 }
