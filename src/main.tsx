@@ -9,12 +9,12 @@ import I18nextBrowserLanguageDetector from "i18next-browser-languagedetector";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { initReactI18next } from "react-i18next";
+import { BrowserRouter } from "react-router";
 
 import App from "./App.tsx";
 import { ChordsProvider } from "./context/chords.tsx";
 import { SettingsProvider } from "./context/settings.tsx";
 import de from "./locales/de.json";
-import { BrowserRouter } from "react-router";
 i18n
   .use(initReactI18next) // passes i18n down to react-i18next
   .use(I18nextBrowserLanguageDetector)

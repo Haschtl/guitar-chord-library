@@ -1,3 +1,4 @@
+import { Close } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -10,16 +11,15 @@ import {
   Grid,
   IconButton,
 } from "@mui/material";
+import { useCallback, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+
+import { Setting } from "../components/Settings";
+import { isHexColorLight, saveSvg, useRealColorScheme } from "../helper";
 import FretboardComponent, {
   defaultFretboardOptions,
   fillFretboard,
 } from "../lib/fretboard";
-import { Trans, useTranslation } from "react-i18next";
-import { useState } from "react";
-import { useCallback } from "react";
-import { Close } from "@mui/icons-material";
-import { Setting } from "../components/Settings";
-import { isHexColorLight, saveSvg, useRealColorScheme } from "../helper";
 
 function useFretboardOptions() {
   const [options, setOptions] = useState({ ...defaultFretboardOptions });
@@ -89,49 +89,49 @@ export const FretboardGenerator = () => {
 
   const presets = [
     {
-      title: t("Guitar Standard Tuning"),
       dots: fillFretboard(15, 6),
       id: "guitar",
       options: {
         ...options,
         tuning: ["E2", "A2", "D3", "G3", "B3", "E4"].reverse(),
       },
+      title: t("Guitar Standard Tuning"),
     },
     {
-      title: t("Guitar Dropped-D Tuning"),
       dots: fillFretboard(15, 6),
       id: "guitar-dd",
       options: {
         ...options,
         tuning: ["D2", "A2", "D3", "G3", "B3", "E4"].reverse(),
       },
+      title: t("Guitar Dropped-D Tuning"),
     },
     {
-      title: t("Bass (4-String) Standard Tuning"),
       dots: fillFretboard(15, 4),
       id: "bass4",
       options: {
         ...options,
         tuning: ["E1", "A1", "D2", "G2"].reverse(),
       },
+      title: t("Bass (4-String) Standard Tuning"),
     },
     {
-      title: t("Bass (5-String) Standard Tuning"),
       dots: fillFretboard(15, 5),
       id: "bass5",
       options: {
         ...options,
         tuning: ["B1", "E1", "A1", "D2", "G2"].reverse(),
       },
+      title: t("Bass (5-String) Standard Tuning"),
     },
     {
-      title: t("Ukulele Standard Tuning"),
-      id: "ukulele",
       dots: fillFretboard(15, 4),
+      id: "ukulele",
       options: {
         ...options,
         tuning: ["G4", "C4", "E4", "A4"].reverse(),
       },
+      title: t("Ukulele Standard Tuning"),
     },
   ];
   return (
@@ -153,8 +153,8 @@ export const FretboardGenerator = () => {
             <CardContent>
               <div
                 style={{
-                  borderRadius: "4px",
                   backgroundColor,
+                  borderRadius: "4px",
                 }}
               >
                 <FretboardComponent
@@ -164,6 +164,7 @@ export const FretboardGenerator = () => {
                 />
               </div>
               <Button
+                // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => {
                   download(p.id);
                 }}

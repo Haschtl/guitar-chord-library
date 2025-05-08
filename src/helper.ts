@@ -1,6 +1,5 @@
 import { useColorScheme } from "@mui/material";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useEffect,useState  } from "react";
 
 export const chordName2id = (name: string) =>
   name.replaceAll("#", "is").replaceAll("/", "_");

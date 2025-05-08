@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  useColorScheme,
   useMediaQuery,
   useTheme,
 } from "@mui/material";

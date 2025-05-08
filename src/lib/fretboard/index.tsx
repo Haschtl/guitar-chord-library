@@ -33,15 +33,15 @@ interface FretboardOptions {
 
   middleFretWidth?: string;
 
+  noteColors?: Record<Note, string>;
+
   nutColor?: string;
 
   nutWidth?: number;
 
   scaleFrets?: boolean;
-
-  tuning?: string[];
   stringCount?: number;
-  noteColors?: Record<Note, string>;
+  tuning?: string[];
 }
 
 export const b2hash = (note: string) => {
@@ -64,15 +64,11 @@ export const german2normalNotation = (chord: string) =>
   chord.replace(/H/g, "B").replace(/B/, "Bb");
 
 export const defaultFretboardOptions = {
-  tuning: ["E4", "B3", "G3", "D3", "A2", "E2"],
   fretColor: "#666",
   fretCount: 15,
   fretWidth: "1",
   middleFretColor: "#ff636c",
   middleFretWidth: "3",
-  nutColor: "#666",
-  nutWidth: 7,
-  scaleFrets: true,
   noteColors: {
     A: "#C550F2",
     "A#": "#4560A255",
@@ -87,6 +83,10 @@ export const defaultFretboardOptions = {
     G: "#75F052",
     "G#": "#85F0B255",
   },
+  nutColor: "#666",
+  nutWidth: 7,
+  scaleFrets: true,
+  tuning: ["E4", "B3", "G3", "D3", "A2", "E2"],
 } satisfies FretboardOptions;
 
 const notePlus = (note: string, plus: number) => {
@@ -113,9 +113,9 @@ interface Props
     React.HTMLAttributes<HTMLElement>,
     HTMLElement
   > {
-  options?: FretboardOptions;
   dots?: Position[];
   id?: string;
+  options?: FretboardOptions;
   scale?: Scale;
 }
 const FretboardComponent: React.FC<Props> = ({
@@ -205,7 +205,6 @@ const FretboardComponent: React.FC<Props> = ({
   }, [fretboard, scale]);
   return (
     <div className="fretboard-component">
-      {/* @ts-ignore wrong type */}
       <figure id={id} {...props} />
       {/* <div style={{ height: "18px" }} /> */}
     </div>

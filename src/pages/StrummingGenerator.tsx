@@ -1,22 +1,6 @@
 import "../lib/strum-pattern/src/App.css";
 
-import React, { type ChangeEvent, useCallback, useRef, useState } from "react";
-
-import { saveSvg } from "../lib/strum-pattern/src/helper.ts";
-import StrumPatternSvg, {
-  defaultStrumOptions,
-} from "../lib/strum-pattern/src/StrumPattern.tsx";
-import library from "../lib/strum-pattern/src/strumPatternLib.ts";
-// import StrumPatternSvg from "./StrumPattern";
-// import library from "./strumPatternLib";
-import TextStrumPattern, {
-  parseKey,
-} from "../lib/strum-pattern/src/TextStrumPattern";
-import type {
-  NoteLength,
-  StrumPattern,
-  StrumPatternOptions,
-} from "../lib/strum-pattern/src/types.ts";
+import { Close } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -33,13 +17,29 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
+  type SelectChangeEvent,
   Typography,
 } from "@mui/material";
+import React, { type ChangeEvent, useCallback, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Close } from "@mui/icons-material";
+
 import { Setting } from "../components/Settings.tsx";
 import { isHexColorLight, useRealColorScheme } from "../helper.ts";
+import { saveSvg } from "../lib/strum-pattern/src/helper.ts";
+import StrumPatternSvg, {
+  defaultStrumOptions,
+} from "../lib/strum-pattern/src/StrumPattern.tsx";
+import library from "../lib/strum-pattern/src/strumPatternLib.ts";
+// import StrumPatternSvg from "./StrumPattern";
+// import library from "./strumPatternLib";
+import TextStrumPattern, {
+  parseKey,
+} from "../lib/strum-pattern/src/TextStrumPattern";
+import type {
+  NoteLength,
+  StrumPattern,
+  StrumPatternOptions,
+} from "../lib/strum-pattern/src/types.ts";
 
 function useStrumOptions() {
   const [options, setOptions] = useState({ ...defaultStrumOptions });
@@ -116,8 +116,8 @@ function StrummingGenerator() {
               <div>
                 <div
                   style={{
-                    borderRadius: "4px",
                     backgroundColor,
+                    borderRadius: "4px",
                     display: "flex",
                     padding: "4px",
                   }}
@@ -277,8 +277,8 @@ function StrummingGenerator() {
                   options={options}
                   strumPattern={sp}
                   style={{
-                    borderRadius: "4px",
                     backgroundColor,
+                    borderRadius: "4px",
                   }}
                 />
               ))}
@@ -336,8 +336,8 @@ const StrumButton: React.FC<{
   return (
     <button
       className="strum-lib-entry"
-      style={style}
       onClick={_onClick}
+      style={style}
       type="button"
     >
       <StrumPatternSvg
@@ -348,31 +348,6 @@ const StrumButton: React.FC<{
         width="100%"
       />
     </button>
-  );
-};
-const StrumInput: React.FC<{
-  Key: string;
-  onChange: (key: string, option: any) => void;
-  option: any;
-}> = ({ Key, option, onChange }) => {
-  const _onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(
-        Key,
-        e.target.value === "0"
-          ? 0
-          : isNaN(Number(e.target.value))
-          ? e.target.value
-          : Number(e.target.value)
-      );
-    },
-    [Key, option, onChange]
-  );
-  return (
-    <div>
-      {Key}
-      <input onChange={_onChange} value={option} />
-    </div>
   );
 };
 

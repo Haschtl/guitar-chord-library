@@ -234,13 +234,13 @@ export function Settings() {
   );
 }
 
-export function Setting<Key extends string>({
+export function Setting<K extends string>({
   Key,
   onChange,
   value,
 }: {
-  Key: Key;
-  onChange: (key: Key, value: string[] | boolean | number | string) => void;
+  Key: K;
+  onChange: (key: K, value: string[] | boolean | number | string) => void;
   value?: FretMarker[] | number[] | string[] | boolean | number | string;
 }) {
   const _onChange = useCallback(

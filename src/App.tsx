@@ -19,7 +19,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <main>
-        <AppBar position="static" color="inherit">
+        <AppBar color="inherit" position="static">
           <Toolbar>
             {/* <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               Chord-Library
