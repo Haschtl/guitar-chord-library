@@ -118,6 +118,8 @@ function StrummingGenerator() {
                   style={{
                     borderRadius: "4px",
                     backgroundColor,
+                    display: "flex",
+                    padding: "4px",
                   }}
                 >
                   <TextStrumPattern
