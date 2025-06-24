@@ -168,7 +168,10 @@ const FretboardComponent: React.FC<Props> = ({
 
     return () => {
       f.clear();
-      f.svg.remove();
+      if ("svg" in f) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        f.svg.remove();
+      }
       setFretboard(undefined);
     };
   }, [options]);

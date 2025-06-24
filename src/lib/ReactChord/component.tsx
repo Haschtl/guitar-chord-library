@@ -30,7 +30,7 @@ export const ReactChord: React.FC<Props> = ({
   ...props
 }) => {
   const id2 = useMemo(
-    () => chordName2id(String(chord.title ?? "chart")) + (id ?? ""),
+    () => chordName2id(chord.title ?? "chart") + (id ?? ""),
     [chord.title, id]
   );
 

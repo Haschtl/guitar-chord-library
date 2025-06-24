@@ -77,10 +77,7 @@ const ReactChordEditable: React.FC<Props> = ({
   const ref = useRef<HTMLDivElement>(null);
   const editorRef = useRef<editor.IStandaloneCodeEditor>(null);
 
-  const id = useMemo(
-    () => chordName2id(String(chord.title ?? "chart")),
-    [chord.title]
-  );
+  const id = useMemo(() => chordName2id(chord.title ?? "chart"), [chord.title]);
   // const id2 = useMemo(
   //   () =>
   //     !open ? "x" : chordName2id(String(chord.title ?? "chart")) + "-modal",
